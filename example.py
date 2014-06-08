@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from timetabler.schedule import Schedule
@@ -22,4 +23,19 @@ def main():
 if __name__ == '__main__':
     start_time = datetime.now()
     scheds = main()
-    print(datetime.now() - start_time)
+    # Unwrap activities out of course-specific tuples
+    scheds = [[act for crs in sched for act in crs]
+               for sched in scheds]
+    # Sort so that the sum of starting times for courses
+    #   throughout the week are greatest
+    scheds = sorted(
+        scheds,
+        key=lambda s: sum(int(a.start_time.replace(":", "")) for a in s),
+        reverse=True
+    )
+    print("Schedule with latest starting times (sum): {}".format(
+        json.dumps([repr(s) for s in scheds[0]], indent=4)
+    ))
+    print("This took {} to calculate.".format(
+        datetime.now() - start_time
+    ))

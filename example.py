@@ -15,10 +15,10 @@ def main():
     s.courses["GEOG 122"].num_section_constraints = [
         (Lecture, 1), (Discussion, 1)
     ]
-    scheds = s.generate_schedules()
+    return s.generate_schedules()
 
 
 if __name__ == '__main__':
     start_time = datetime.now()
-    main()
+    scheds = main()
     print(datetime.now() - start_time)

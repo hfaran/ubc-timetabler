@@ -54,7 +54,7 @@ class Schedule(object):
             filtered_combs = ifilter(filter_func, combs)
             # Do non-lazy set() to actually create and set schedules for course; up until this
             #   this point, everything has been lazy for performance
-            schedules_by_course[name] = set(filtered_combs)  # TODO: set or list
+            schedules_by_course[name] = list(filtered_combs)
 
         all_scheds = combinations(chain.from_iterable(schedules_by_course.values()),
                                   r=len(schedules_by_course))
@@ -65,7 +65,7 @@ class Schedule(object):
             all_unique(a.section for t in s for a in t),
             not self._check_schedule_conflicts(s)
         ])
-        filtered_all_scheds = set(ifilter(filter_func, all_scheds))  # TODO: set or list
+        filtered_all_scheds = list(ifilter(filter_func, all_scheds))
         if DEBUG: print("Found {} valid schedules.".format(len(filtered_all_scheds)))
 
         return filtered_all_scheds

@@ -1,2 +1,1 @@
-ubc_timetabler
-==============
+# ubc-timetabler

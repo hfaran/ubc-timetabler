@@ -11,7 +11,13 @@ class Schedule(object):
     def __init__(self, courses, session="2014W", terms=(1, 2)):
         """Schedule
 
+        :type  courses: list
         :param courses: ["CPSC 304", ...]
+        :type  session: str|unicode
+        :param session: Session you want to schedule for
+        :type  terms: tuple|list
+        :param terms: List of terms you want to schedule courses in;
+            i.e., [1] for only first term, [1, 2] for whole session etc.
         """
         self.ssc_conn = SSCConnection()
         self.courses = {c: self.ssc_conn.get_course(c, session) for c in courses}
@@ -76,6 +82,7 @@ class Schedule(object):
             act1.end_time > act2.start_time,
             # Check if they are on the same day(s)
             act1.days & act2.days,
+            act1.term == act2.term
         ])
 
     @classmethod

@@ -1,7 +1,11 @@
 import os
 import time
+from itertools import permutations
 
 import requests
+from bs4 import BeautifulSoup
+
+from timetabler.course import Lecture, Lab, Tutorial
 
 
 DEBUG = True
@@ -10,10 +14,11 @@ DEBUG = True
 class SSCConnection(object):
     """Connection to UBC SSC
 
-    :param cache_period: Life of cache before invalidation (number of seconds)
+    :param cache_period: Life of cache before invalidation (number of seconds);
+        if this is set to None, cache is never automatically invalidated
     """
 
-    def __init__(self, cache_period=86400):
+    def __init__(self, cache_period=None):
         self.base_url = "https://courses.students.ubc.ca/cs/main"
         self.cache_period = cache_period
         self.cache_path = os.path.join(
@@ -22,6 +27,83 @@ class SSCConnection(object):
         )
         if not os.path.exists(self.cache_path):
             os.mkdir(self.cache_path)
+
+
+    def activities_from_page(self, page):
+
+        def activity_from_data(data):
+            data = data[:]
+            data_length = len(data)
+            if data_length < 15:
+                num_missing = 15 - data_length
+                data += ['' for i in xrange(num_missing)]
+            data_dict = {k: data[v].strip(u'\n \xa0') for k, v in attrs.iteritems()}
+
+            try:
+                activity_cls = {
+                    u'Lecture': Lecture,
+                    u'Laboratory': Lab,
+                    u'Tutorial': Tutorial
+                }[data_dict["Activity"]]
+            except KeyError:
+                if DEBUG: print("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
+                return None
+
+            activity = activity_cls(
+                status=data_dict["Status"],
+                section=data_dict["Section"],
+                days=data_dict["Days"],
+                start_time=data_dict["Start Time"],
+                end_time=data_dict["End Time"],
+                comments=data_dict["Comments"]
+            )
+            return activity
+
+        # The following code is horrible
+        # But you already knew that, because I'm trying to extract useful information by scraping
+        soup = BeautifulSoup(page)
+        t = soup.text
+        attrs = {
+            u'Status': 0,
+            u'Section': 4,
+            u'Activity': 7,
+            u'Term': 8,
+            u'Interval': 9,  # Either 9 or 10?
+            u'Days': 11,
+            u'Start Time': 12,
+            u'End Time': 13,
+            u'Comments': 14
+        }
+        statuses = [
+            u'\xa0',
+            'Restricted',
+            'Unreleased',
+            'Temp. Unavailable',
+            'Full'
+        ]
+        activities = map(unicode, ['Lecture', 'Laboratory', 'Waiting List', 'Tutorial'])
+        terms = map(unicode, [1, 2])
+        _day_list = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+        days = map(unicode, _day_list) + map(u" ".join, permutations(_day_list, 2)) \
+               + map(u" ".join, permutations(_day_list, 3))
+
+        # Get rid of the top of the page
+        t = t.split("Choose one section from all 2 activity types. (e.g. Lecture and Laboratory)")[-1]
+        # Get rid of the bottom of the page
+        t = "".join(t.split("Browse")[:-1])  # The list should be length 1 but "".join to do it cleanly
+        # Strip outer stuff (newlines, spaces, etc.)
+        t = t.strip(u'\n \xa0')
+        # Split by newlines to start and give an almost "cell-by-cell" list for the table
+        t = t.split('\n')
+        # Strip sections and spaces so that after this we are actually left with a list of all course stuff
+        itert = iter(t)
+        current = next(itert)
+        while current in attrs.keys() + [u'']:
+            current = next(itert)
+        t = list(itert) + [current]
+        # Create and return list of activities
+        return [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)]
+
 
     def get_course_page(self, dept="CPSC", course="304", sessyr="2014", sesscd="W", invalidate=False):
         """Get course page from SSC
@@ -73,9 +155,15 @@ class SSCConnection(object):
         period = time.time() - last_modified
         if DEBUG: print("Page was last fetched {:.0f} seconds ago.".format(period))
         # If cache is stale, or an invalidation was requested, remove
-        if any([period > self.cache_period, invalidate]):
+        if any([(self.cache_period) and (period > self.cache_period), invalidate]):
             os.remove(filename)
             return None
         # Cache exists, and is valid, so return it
         with open(filename, 'r') as f:
             return f.read()
+
+
+def chunks(l, n):
+    """Yields successive ``n``-sized chunks from ``l``"""
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]

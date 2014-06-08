@@ -1,9 +1,11 @@
 class Activity(object):
-    def __init__(self, section, days, start_time, end_time):
-        self.section = section
-        self.days = days
-        self.start_time = start_time
+    def __init__(self, status, section, term, days, start_time, end_time, comments):
+        self.status = status  # e.g, "Restricted"
+        self.section = section  # e.g., "EECE 310 L1A"
+        self.days = days.split()  # e.g., ["Mon", "Wed"]
+        self.start_time = start_time  # e.g., "13:00"
         self.end_time = end_time
+        self.comments = comments
 
 
 class Lecture(Activity):

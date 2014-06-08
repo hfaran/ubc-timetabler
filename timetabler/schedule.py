@@ -83,7 +83,8 @@ class Schedule(object):
             act1.start_time < act2.end_time,
             act1.end_time > act2.start_time,
             # Check if they are on the same day(s)
-            act1.days & act2.days,
+            act1.days & act2.days,  # set intersection
+            # Check that they are in the same term
             act1.term == act2.term
         ])
 

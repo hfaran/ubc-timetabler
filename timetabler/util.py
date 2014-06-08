@@ -1,5 +1,8 @@
 def chunks(l, n):
-    """Yields successive ``n``-sized chunks from ``l``"""
+    """Yields successive ``n``-sized chunks from ``l``
+
+    http://stackoverflow.com/a/312464/1798683
+    """
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
 
@@ -35,7 +38,10 @@ def check_diff(iterable):
 
 
 def all_unique(x):
-    """Check if all items in ``x`` are unique"""
+    """Check if all items in ``x`` are unique
+
+    http://stackoverflow.com/a/5281641/1798683
+    """
     seen = set()
     return not any(i in seen or seen.add(i) for i in x)
 

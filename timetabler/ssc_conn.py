@@ -1,11 +1,11 @@
 import os
 import time
-from itertools import permutations
 
 import requests
 from bs4 import BeautifulSoup
 
 from timetabler.course import Lecture, Lab, Tutorial
+from timetabler.util import chunks
 
 
 DEBUG = True
@@ -52,7 +52,7 @@ class SSCConnection(object):
             data = data[:]
             # Fill in anything missing with empty string
             # (This is to handle the case of the last activity which may have had comments section
-            #   stripped from it)
+            # stripped from it)
             data_length = len(data)
             if data_length < 15:
                 num_missing = 15 - data_length
@@ -160,9 +160,3 @@ class SSCConnection(object):
         # Cache exists, and is valid, so return it
         with open(filename, 'r') as f:
             return f.read()
-
-
-def chunks(l, n):
-    """Yields successive ``n``-sized chunks from ``l``"""
-    for i in xrange(0, len(l), n):
-        yield l[i:i + n]

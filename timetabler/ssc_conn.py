@@ -4,7 +4,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from timetabler.course import Lecture, Lab, Tutorial
+from timetabler.course import Lecture, Lab, Tutorial, Course
 from timetabler.util import chunks
 
 
@@ -28,8 +28,34 @@ class SSCConnection(object):
         if not os.path.exists(self.cache_path):
             os.mkdir(self.cache_path)
 
+    ##################
+    # Public Methods #
+    ##################
 
-    def activities_from_page(self, page):
+    def get_course(self, course_name="CPSC 304", session="2014W"):
+        dept, course_num = course_name.split()
+        sessyr, sesscd = session[:4], session[-1]
+        page = self._get_course_page(dept, course_num, sessyr, sesscd)
+        activities = self._activities_from_page(page)
+
+        lectures = [a for a in activities if isinstance(a, Lecture)]
+        labs = [a for a in activities if isinstance(a, Lab)]
+        tutorials = [a for a in activities if isinstance(a, Tutorial)]
+
+        course = Course(
+            dept=dept,
+            number=course_num,
+            lectures=lectures,
+            labs=labs,
+            tutorials=tutorials
+        )
+        return course
+
+    ###################
+    # Private Methods #
+    ###################
+
+    def _activities_from_page(self, page):
         """Get list of ``Activity`` subclasses from data in ``page``
 
         :rtype: [Activity, ...]
@@ -102,7 +128,7 @@ class SSCConnection(object):
         return filter(lambda a: a is not None, [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)])
 
 
-    def get_course_page(self, dept="CPSC", course="304", sessyr="2014", sesscd="W", invalidate=False):
+    def _get_course_page(self, dept="CPSC", course_num="304", sessyr="2014", sesscd="W", invalidate=False):
         """Get course page from SSC
 
         Retrieved pages are cached for a ``self.cache_period``, and then invalidated.
@@ -115,7 +141,7 @@ class SSCConnection(object):
         :param invalidate: If this is set, existing cache for the page will be invalidated
         :returns: Text of SSC course page for given course
         """
-        page_name = "_".join(map(lambda x: str(x).lower(), [dept, course, sessyr, sesscd]))
+        page_name = "_".join(map(lambda x: str(x).lower(), [dept, course_num, sessyr, sesscd]))
         # Attempt to retrieve already cached page
         page = self._retrieve_cached_page(page_name, invalidate=invalidate)
         # If not already cached, retrieve, cache, and return
@@ -126,7 +152,7 @@ class SSCConnection(object):
                 tname="subjareas",
                 req="3",
                 dept=dept,
-                course=course,
+                course=course_num,
                 sessyr=sessyr,
                 sesscd=sesscd
             ))

@@ -1,11 +1,16 @@
 import os
-
+import time
 import requests
 
 
 class SSCConnection(object):
-    def __init__(self):
+    """Connection to UBC SSC
+
+    :param cache_period: Life of cache before invalidation (number of seconds)
+    """
+    def __init__(self, cache_period=86400):
         self.base_url = "https://courses.students.ubc.ca/cs/main"
+        self.cache_period = cache_period
         self.cache_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "__cache__"
@@ -14,8 +19,20 @@ class SSCConnection(object):
             os.mkdir(self.cache_path)
 
     def get_course_page(self, dept="CPSC", course="304", sessyr="2014", sesscd="W"):
+        """Get course page from SSC
+
+        Retrieved pages are cached for a ``self.cache_period``, and then invalidated.
+
+        :type dept: str
+        :type course: str|int
+        :type sessyr: str|int
+        :type sesscd: str
+        :returns: Text of SSC course page for given course
+        """
         page_name = "_".join(map(lambda x: str(x).lower(), [dept, course, sessyr, sesscd]))
+        # Attempt to retrieve already cached page
         page = self._retrieve_cached_page(page_name)
+        # If not already cached, retrieve, cache, and return
         if page is None:
             r = requests.get(self.base_url, params=dict(
                 pname="subjarea",
@@ -39,8 +56,15 @@ class SSCConnection(object):
 
     def _retrieve_cached_page(self, name):
         filename = os.path.join(self.cache_path, name)
-        if os.path.exists(filename):
-            with open(filename, 'r') as f:
-                return f.read()
-        else:
+        # First case, cache does not already exist
+        if not os.path.exists(filename):
             return None
+        # Check if existing cache is invalid (if so, remove and return None)
+        last_modified = os.path.getmtime(filename)
+        period = time.time() - last_modified
+        if period > self.cache_period:
+            os.remove(filename)
+            return None
+        # Cache exists, and is valid, so return it
+        with open(filename, 'r') as f:
+            return f.read()

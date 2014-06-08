@@ -14,8 +14,6 @@ class Course(object):
         assert all(isinstance(l, Discussion) for l in self.discussions)
         self._constraints = custom_constraints if custom_constraints else None
 
-    # TODO: Add a constraint (or similar) that the status of an Activity must not be Full
-
     @property
     def constraints(self):
         if self._constraints is None:

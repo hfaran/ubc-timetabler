@@ -30,7 +30,7 @@ class Activity(object):
         self.status = status  # e.g, "Restricted"
         self.section = section  # e.g., "EECE 310 L1A"
         self.term = int(term)  # e.g., 2
-        self.days = days.split()  # e.g., ["Mon", "Wed"]
+        self.days = set(days.split())  # e.g., {"Mon", "Wed"}
         self.start_time = start_time  # e.g., "13:00"
         self.end_time = end_time
         self.comments = comments

@@ -1,6 +1,6 @@
 class Course(object):
     def __init__(self, dept, number,
-                 lectures=None, labs=None, tutorials=None,
+                 lectures=None, labs=None, tutorials=None, discussions=None,
                  custom_constraints=None):
         self.dept = dept
         self.number = number
@@ -10,6 +10,8 @@ class Course(object):
         assert all(isinstance(l, Lab) for l in self.labs)
         self.tutorials = tutorials if tutorials else []
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
+        self.discussions = discussions if discussions else []
+        assert all(isinstance(l, Discussion) for l in self.discussions)
         self._constraints = custom_constraints if custom_constraints else None
 
     # TODO: Add a constraint (or similar) that the status of an Activity must not be Full
@@ -19,10 +21,15 @@ class Course(object):
         if self._constraints is None:
             self._constraints = [
                 (l[0].__class__, 1)
-                for l in [self.labs, self.lectures, self.tutorials]
+                for l in [self.labs, self.lectures,
+                          self.tutorials, self.discussions]
                 if l
             ]
         return self._constraints
+
+    @property
+    def activities(self):
+        return self.lectures + self.tutorials + self.labs + self.discussions
 
 
 class Activity(object):
@@ -62,4 +69,7 @@ class Lab(Activity):
 
 
 class Tutorial(Activity):
+    pass
+
+class Discussion(Activity):
     pass

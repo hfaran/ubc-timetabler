@@ -27,7 +27,7 @@ class Schedule(object):
         # TODO: Use a legit scheduling algorithm and not brute force?
         schedules_by_course = {}
         for name, course in self.courses.items():
-            acts = course.labs + course.lectures + course.tutorials
+            acts = course.activities
             r = sum(c[1] for c in course.constraints)
             combs = combinations(acts, r)
             # Makes sure:

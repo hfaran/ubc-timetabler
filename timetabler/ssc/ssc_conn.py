@@ -4,7 +4,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from .course import Lecture, Lab, Tutorial, Course
+from .course import Lecture, Lab, Tutorial, Course, Discussion
 from timetabler.util import chunks
 
 
@@ -41,13 +41,15 @@ class SSCConnection(object):
         lectures = [a for a in activities if isinstance(a, Lecture)]
         labs = [a for a in activities if isinstance(a, Lab)]
         tutorials = [a for a in activities if isinstance(a, Tutorial)]
+        discussions = [a for a in activities if isinstance(a, Discussion)]
 
         course = Course(
             dept=dept,
             number=course_num,
             lectures=lectures,
             labs=labs,
-            tutorials=tutorials
+            tutorials=tutorials,
+            discussions=discussions
         )
         return course
 
@@ -90,7 +92,8 @@ class SSCConnection(object):
                 activity_cls = {
                     u'Lecture': Lecture,
                     u'Laboratory': Lab,
-                    u'Tutorial': Tutorial
+                    u'Tutorial': Tutorial,
+                    u'Discussion': Discussion
                 }[data_dict["Activity"]]
             except KeyError:
                 if DEBUG: print("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))

@@ -4,13 +4,42 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
-def check_equal(lst):
-    """Check equivalency or all items in ``lst``
+def check_equal(iterable):
+    """Check equivalency or all items in ``iterable``
 
-    http://stackoverflow.com/q/3844948/
+    >>> check_equal(xrange(5))
+    False
+    >>> check_equal([1, 1, 1])
+    True
+    >>> check_equal([1, 2, 1])
+    False
     """
-    # This works by counting the number of occurrences
-    #   of the first element of the list and checking
-    #   if that count is equal to the length of the
-    #   list
-    return not lst or lst.count(lst[0]) == len(lst)
+    iterable = iter(iterable)
+    first = next(iterable)
+    return all(first == i for i in iterable)
+
+
+def check_diff(iterable):
+    """Returns true if any items in ``iterable`` differ
+
+    >>> check_diff([1, 1])
+    False
+    >>> check_diff([1, 2])
+    True
+    >>> check_diff(xrange(5))
+    True
+    """
+    iterable = iter(iterable)
+    first = next(iterable)
+    return any(first != i for i in iterable)
+
+
+def all_unique(x):
+    """Check if all items in ``x`` are unique"""
+    seen = set()
+    return not any(i in seen or seen.add(i) for i in x)
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

@@ -1,11 +1,20 @@
 from itertools import permutations, chain, ifilter
+from pprint import pprint
 
 from timetabler.ssc import SSCConnection
-from timetabler.util import check_equal
+from timetabler.util import check_equal, check_diff, all_unique
 
 
 def check_conflict(act1, act2):
     return act1.start_time < act2.end_time and act1.end_time > act2.start_time
+
+
+def check_conflicts(current_act, other_acts):
+    return any(check_conflict(current_act, other_act) for other_act in other_acts)
+
+
+# def check_schedule_conflicts(schedule):
+#     return any(check_conflict(current_section, other_sections) for )
 
 
 class Schedule(object):
@@ -40,12 +49,23 @@ class Schedule(object):
                 all(act.term in self.terms for act in combo),
                 check_equal([act.term for act in combo])
             ])
-            filtered_perms = set(ifilter(filter_func, perms))
+            filtered_perms = set(ifilter(filter_func, perms))  # HEADS-UP: Non-lazy op
             schedules_by_course[name] = filtered_perms
 
-        all_scheds = permutations(chain(*schedules_by_course.values()), r=len(schedules_by_course))
-        print len(list(all_scheds))
+        all_scheds = permutations(chain.from_iterable(schedules_by_course.values()),
+                                  r=len(schedules_by_course))
+        # At this point, schedules look like this:
+        # ((Lab<status='Restricted', section='EECE 381 L2A', term='2', days='[u'Tue', u'Thu']', start_time='16:00', end_time='19:00'>,
+        #   Lecture<status='Restricted', section='EECE 381 201', term='2', days='[u'Mon']', start_time='9:00', end_time='11:00'>),
+        #  (Lab<status='Restricted', section='EECE 353 L2C', term='2', days='[u'Thu']', start_time='14:00', end_time='16:00'>,
+        #   Lecture<status='', section='EECE 353 201', term='2', days='[u'Tue', u'Thu']', start_time='14:00', end_time='15:30'>),
+        #  (Lecture<status='', section='CPSC 304 201', term='2', days='[u'Tue', u'Thu']', start_time='11:00', end_time='12:30'>,
+        #   Tutorial<status='', section='CPSC 304 T2A', term='2', days='[u'Fri']', start_time='14:00', end_time='15:00'>))
 
+        # Makes sure:
+        # * Schedules don't have recurring courses
+        # * Don't have conflicts  TODO
+        filter_func = lambda s: all_unique(a.section for t in s for a in t)
+        filtered_all_scheds = filter(filter_func, all_scheds)
 
-
-        return schedules_by_course
+        return filtered_all_scheds

@@ -30,40 +30,10 @@ class SSCConnection(object):
 
 
     def activities_from_page(self, page):
+        """Get list of ``Activity`` subclasses from data in ``page``
 
-        def activity_from_data(data):
-            data = data[:]
-            data_length = len(data)
-            if data_length < 15:
-                num_missing = 15 - data_length
-                data += ['' for i in xrange(num_missing)]
-            data_dict = {k: data[v].strip(u'\n \xa0') for k, v in attrs.iteritems()}
-
-            try:
-                activity_cls = {
-                    u'Lecture': Lecture,
-                    u'Laboratory': Lab,
-                    u'Tutorial': Tutorial
-                }[data_dict["Activity"]]
-            except KeyError:
-                if DEBUG: print("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
-                return None
-
-            activity = activity_cls(
-                status=data_dict["Status"],
-                section=data_dict["Section"],
-                term=data_dict["Term"],
-                days=data_dict["Days"],
-                start_time=data_dict["Start Time"],
-                end_time=data_dict["End Time"],
-                comments=data_dict["Comments"]
-            )
-            return activity
-
-        # The following code is horrible
-        # But you already knew that, because I'm trying to extract useful information by scraping
-        soup = BeautifulSoup(page)
-        t = soup.text
+        :rtype: [Activity, ...]
+        """
         attrs = {
             u'Status': 0,
             u'Section': 4,
@@ -75,19 +45,44 @@ class SSCConnection(object):
             u'End Time': 13,
             u'Comments': 14
         }
-        statuses = [
-            u'\xa0',
-            'Restricted',
-            'Unreleased',
-            'Temp. Unavailable',
-            'Full'
-        ]
-        activities = map(unicode, ['Lecture', 'Laboratory', 'Waiting List', 'Tutorial'])
-        terms = map(unicode, [1, 2])
-        _day_list = ["Mon", "Tue", "Wed", "Thu", "Fri"]
-        days = map(unicode, _day_list) + map(u" ".join, permutations(_day_list, 2)) \
-               + map(u" ".join, permutations(_day_list, 3))
 
+        def activity_from_data(data):
+            """Return an ``Activity`` subclass generated from ``data``"""
+            # Make copy
+            data = data[:]
+            # Fill in anything missing with empty string
+            # (This is to handle the case of the last activity which may have had comments section
+            #   stripped from it)
+            data_length = len(data)
+            if data_length < 15:
+                num_missing = 15 - data_length
+                data += ['' for i in xrange(num_missing)]
+            # Generate a mapping of the data using ``attrs`` defined below
+            data_dict = {k: data[v].strip(u'\n \xa0') for k, v in attrs.iteritems()}
+            # Find the appropriate Activity subclass (Lab/Lecture etc.)
+            try:
+                activity_cls = {
+                    u'Lecture': Lecture,
+                    u'Laboratory': Lab,
+                    u'Tutorial': Tutorial
+                }[data_dict["Activity"]]
+            except KeyError:
+                if DEBUG: print("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
+                return None
+            # Create and return activity
+            activity = activity_cls(
+                status=data_dict["Status"],
+                section=data_dict["Section"],
+                term=data_dict["Term"],
+                days=data_dict["Days"],
+                start_time=data_dict["Start Time"],
+                end_time=data_dict["End Time"],
+                comments=data_dict["Comments"]
+            )
+            return activity
+
+        soup = BeautifulSoup(page)
+        t = soup.text
         # Get rid of the top of the page
         t = t.split("Choose one section from all 2 activity types. (e.g. Lecture and Laboratory)")[-1]
         # Get rid of the bottom of the page
@@ -143,11 +138,13 @@ class SSCConnection(object):
             return page
 
     def _cache_page(self, name, text):
+        """Stores page with name ``name`` and contents ``text`` to the cache folder"""
         filename = os.path.join(self.cache_path, name)
         with open(filename, 'w+') as f:
             f.write(text)
 
     def _retrieve_cached_page(self, name, invalidate=False):
+        """Retrieves page ``name`` from cache"""
         filename = os.path.join(self.cache_path, name)
         # First case, cache does not already exist
         if not os.path.exists(filename):

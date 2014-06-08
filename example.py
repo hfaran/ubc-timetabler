@@ -11,7 +11,8 @@ def main():
     s.courses["GEOG 122"].add_constraint(
         lambda acts: all(a.status not in [u"STT"] for a in acts)
     )
-    # Default sections Tutorial (for Vantage)
+    # Default sections contained a Tutorial but that is for Vantage
+    #   students, so removing that and only setting Lecture and Discussion
     s.courses["GEOG 122"].num_section_constraints = [
         (Lecture, 1), (Discussion, 1)
     ]

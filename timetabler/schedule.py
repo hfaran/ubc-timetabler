@@ -40,7 +40,8 @@ class Schedule(object):
             # * constraints from Course are met
             # * all activities are in terms that we want (according to self.terms)
             # * all activities themselves are in the same term
-            # * no activities are included that are Full/Blocked/STT
+            # * no activities are included that are Full/Blocked
+            # * all constraints from the course are satisfied
             filter_func = lambda combo: all([
                 all(
                     sum(int(isinstance(act, constraint[0])) for act in combo) == constraint[1]
@@ -52,7 +53,7 @@ class Schedule(object):
                 all(c(combo) for c in course.constraints)
             ])
             filtered_combs = ifilter(filter_func, combs)
-            # Do non-lazy set() to actually create and set schedules for course; up until this
+            # Do non-lazy list() to actually create and set schedules for course; up until this
             #   this point, everything has been lazy for performance
             schedules_by_course[name] = list(filtered_combs)
 
@@ -65,7 +66,7 @@ class Schedule(object):
             all_unique(a.section for t in s for a in t),
             not self._check_schedule_conflicts(s)
         ])
-        filtered_all_scheds = list(ifilter(filter_func, all_scheds))
+        filtered_all_scheds = filter(filter_func, all_scheds)
         if DEBUG: print("Found {} valid schedules.".format(len(filtered_all_scheds)))
 
         return filtered_all_scheds

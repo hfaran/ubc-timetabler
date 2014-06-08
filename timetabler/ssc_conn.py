@@ -1,6 +1,10 @@
 import os
 import time
+
 import requests
+
+
+DEBUG = True
 
 
 class SSCConnection(object):
@@ -8,6 +12,7 @@ class SSCConnection(object):
 
     :param cache_period: Life of cache before invalidation (number of seconds)
     """
+
     def __init__(self, cache_period=86400):
         self.base_url = "https://courses.students.ubc.ca/cs/main"
         self.cache_period = cache_period
@@ -34,6 +39,7 @@ class SSCConnection(object):
         page = self._retrieve_cached_page(page_name)
         # If not already cached, retrieve, cache, and return
         if page is None:
+            if DEBUG: print("Page was not found in cache or was invalidated; retrieving from remote and caching...")
             r = requests.get(self.base_url, params=dict(
                 pname="subjarea",
                 tname="subjareas",
@@ -47,6 +53,7 @@ class SSCConnection(object):
             self._cache_page(page_name, page_data)
             return page_data
         else:
+            if DEBUG: print("Valid existing page was found in cache; retrieving from file...")
             return page
 
     def _cache_page(self, name, text):
@@ -62,6 +69,7 @@ class SSCConnection(object):
         # Check if existing cache is invalid (if so, remove and return None)
         last_modified = os.path.getmtime(filename)
         period = time.time() - last_modified
+        if DEBUG: print("Page was last fetched {:.0f} seconds ago.".format(period))
         if period > self.cache_period:
             os.remove(filename)
             return None

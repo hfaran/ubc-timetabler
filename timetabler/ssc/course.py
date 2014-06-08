@@ -17,6 +17,22 @@ class Course(object):
                       self.tutorials, self.discussions]
             if l
         ]
+        self._constraints = []
+
+    @property
+    def constraints(self):
+        return self._constraints
+
+    def add_constraint(self, constraint):
+        """Add constraint ``constraint`` to list of constraints
+
+        :type  constraint: callable
+        :param constraint: A callable that takes a (single) list of
+            Activity subtype instances that belong to this Course that we want
+            to return True for in order to consider that list of
+            Activities valid.
+        """
+        self._constraints.append(constraint)
 
     @property
     def num_section_constraints(self):

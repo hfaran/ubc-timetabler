@@ -24,7 +24,7 @@ class Schedule(object):
         self.terms = terms
         self.session = session
 
-    # #################
+    ##################
     # Public Methods #
     ##################
 
@@ -48,12 +48,13 @@ class Schedule(object):
                 ),
                 all(act.term in self.terms for act in combo),
                 check_equal([act.term for act in combo]),
-                all(a.status not in [u"Full", u"STT", u"Blocked"] for a in combo),
+                all(a.status not in [u"Full", u"Blocked"] for a in combo),
+                all(c(combo) for c in course.constraints)
             ])
             filtered_combs = ifilter(filter_func, combs)
             # Do non-lazy set() to actually create and set schedules for course; up until this
             #   this point, everything has been lazy for performance
-            schedules_by_course[name] = set(filtered_combs)
+            schedules_by_course[name] = list(filtered_combs)  # TODO: set or list
 
         all_scheds = combinations(chain.from_iterable(schedules_by_course.values()),
                                   r=len(schedules_by_course))
@@ -64,7 +65,7 @@ class Schedule(object):
             all_unique(a.section for t in s for a in t),
             not self._check_schedule_conflicts(s)
         ])
-        filtered_all_scheds = set(ifilter(filter_func, all_scheds))
+        filtered_all_scheds = list(ifilter(filter_func, all_scheds))  # TODO: set or list
         if DEBUG: print("Found {} valid schedules.".format(len(filtered_all_scheds)))
 
         return filtered_all_scheds

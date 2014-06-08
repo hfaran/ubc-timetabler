@@ -36,18 +36,21 @@ class Activity(object):
         self.comments = comments
 
     def __repr__(self):
-        return "Lecture<" + ", ".join([
-            "{}='{}'".format(attr, getattr(self, attr)) for attr in
-            [
-                'status',
-                'section',
-                'term',
-                'days',
-                'start_time',
-                'end_time',
-                'comments',
-            ]
-        ]) + ">"
+        return "{}<{}>".format(
+            self.__class__.__name__,
+            ", ".join([
+                "{}='{}'".format(attr, getattr(self, attr)) for attr in
+                [
+                    'status',
+                    'section',
+                    'term',
+                    'days',
+                    'start_time',
+                    'end_time',
+                    'comments',
+                ]
+            ])
+        )
 
 
 class Lecture(Activity):

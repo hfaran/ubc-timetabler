@@ -7,46 +7,6 @@ from timetabler.util import check_equal, all_unique
 DEBUG = True
 
 
-def check_conflict(act1, act2):
-    """Checks for a scheduling conflict between two Activity instances"""
-    return all([
-        # Check time conflict
-        act1.start_time < act2.end_time,
-        act1.end_time > act2.start_time,
-        # Check if they are on the same day(s)
-        act1.days & act2.days,
-    ])
-
-
-def check_conflicts(current_act, other_acts):
-    """Check for scheduling conflicts between ``current_act`` and ``other_acts``
-
-    :type  current_act: Activity
-    :type  other_acts: [Activity, ...]
-    """
-    return any(check_conflict(current_act, other_act) for other_act in other_acts)
-
-
-def check_schedule_conflicts(schedule):
-    """Check for conflicts in ``schedule``
-
-    e.g. for ``schedule``:
-    ((Lab<status='Restricted', section='EECE 381 L2A', term='2', days='[u'Tue', u'Thu']', start_time='16:00', end_time='19:00'>,
-      Lecture<status='Restricted', section='EECE 381 201', term='2', days='[u'Mon']', start_time='9:00', end_time='11:00'>),
-     (Lab<status='Restricted', section='EECE 353 L2C', term='2', days='[u'Thu']', start_time='14:00', end_time='16:00'>,
-      Lecture<status='', section='EECE 353 201', term='2', days='[u'Tue', u'Thu']', start_time='14:00', end_time='15:30'>),
-     (Lecture<status='', section='CPSC 304 201', term='2', days='[u'Tue', u'Thu']', start_time='11:00', end_time='12:30'>,
-      Tutorial<status='', section='CPSC 304 T2A', term='2', days='[u'Fri']', start_time='14:00', end_time='15:00'>))
-    """
-    acts = [a for t in schedule for a in t]
-    for current_act in acts:
-        other_acts = (a for a in acts if a != current_act)
-        if check_conflicts(current_act, other_acts):
-            return True
-    else:
-        return False
-
-
 class Schedule(object):
     def __init__(self, courses, session="2014W", terms=(1, 2)):
         """Schedule
@@ -57,6 +17,10 @@ class Schedule(object):
         self.courses = {c: self.ssc_conn.get_course(c, session) for c in courses}
         self.terms = terms
         self.session = session
+
+    # #################
+    # Public Methods #
+    ##################
 
     def generate_schedules(self):
         """Generate valid schedules"""
@@ -90,9 +54,53 @@ class Schedule(object):
         # * Don't have conflicts
         filter_func = lambda s: all([
             all_unique(a.section for t in s for a in t),
-            not check_schedule_conflicts(s)
+            not self._check_schedule_conflicts(s)
         ])
         filtered_all_scheds = set(ifilter(filter_func, all_scheds))
         if DEBUG: print("Found {} valid schedules.".format(len(filtered_all_scheds)))
 
         return filtered_all_scheds
+
+    ###################
+    # Private Methods #
+    ###################
+
+    @classmethod
+    def _check_conflict(cls, act1, act2):
+        """Checks for a scheduling conflict between two Activity instances"""
+        return all([
+            # Check time conflict
+            act1.start_time < act2.end_time,
+            act1.end_time > act2.start_time,
+            # Check if they are on the same day(s)
+            act1.days & act2.days,
+        ])
+
+    @classmethod
+    def _check_conflicts(cls, current_act, other_acts):
+        """Check for scheduling conflicts between ``current_act`` and ``other_acts``
+
+        :type  current_act: Activity
+        :type  other_acts: [Activity, ...]
+        """
+        return any(cls._check_conflict(current_act, other_act) for other_act in other_acts)
+
+    @classmethod
+    def _check_schedule_conflicts(cls, schedule):
+        """Check for conflicts in ``schedule``
+
+        e.g. for ``schedule``:
+        ((Lab<status='Restricted', section='EECE 381 L2A', term='2', days='[u'Tue', u'Thu']', start_time='16:00', end_time='19:00'>,
+          Lecture<status='Restricted', section='EECE 381 201', term='2', days='[u'Mon']', start_time='9:00', end_time='11:00'>),
+         (Lab<status='Restricted', section='EECE 353 L2C', term='2', days='[u'Thu']', start_time='14:00', end_time='16:00'>,
+          Lecture<status='', section='EECE 353 201', term='2', days='[u'Tue', u'Thu']', start_time='14:00', end_time='15:30'>),
+         (Lecture<status='', section='CPSC 304 201', term='2', days='[u'Tue', u'Thu']', start_time='11:00', end_time='12:30'>,
+          Tutorial<status='', section='CPSC 304 T2A', term='2', days='[u'Fri']', start_time='14:00', end_time='15:00'>))
+        """
+        acts = [a for t in schedule for a in t]
+        for current_act in acts:
+            other_acts = (a for a in acts if a != current_act)
+            if cls._check_conflicts(current_act, other_acts):
+                return True
+        else:
+            return False

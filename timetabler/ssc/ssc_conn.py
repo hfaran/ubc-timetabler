@@ -18,7 +18,7 @@ class SSCConnection(object):
         if this is set to None, cache is never automatically invalidated
     """
 
-    def __init__(self, cache_period=None):
+    def __init__(self, cache_period=86400):
         self.base_url = "https://courses.students.ubc.ca/cs/main"
         self.cache_period = cache_period
         self.cache_path = os.path.join(
@@ -110,9 +110,9 @@ class SSCConnection(object):
         soup = BeautifulSoup(page)
         t = soup.text
         # Get rid of the top of the page
-        t = t.split("Choose one section from all 2 activity types. (e.g. Lecture and Laboratory)")[-1]
+        t = t.split("Status\nSection")[-1]
         # Get rid of the bottom of the page
-        t = "".join(t.split("Browse")[:-1])  # The list should be length 1 but "".join to do it cleanly
+        t = "".join(t.split("Browse    Standard Timetables")[:-1])  # The list should be length 1 but "".join to do it cleanly
         # Strip outer stuff (newlines, spaces, etc.)
         t = t.strip(u'\n \xa0')
         # Split by newlines to start and give an almost "cell-by-cell" list for the table

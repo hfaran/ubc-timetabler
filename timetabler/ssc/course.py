@@ -47,7 +47,7 @@ class Activity(object):
                     'days',
                     'start_time',
                     'end_time',
-                    'comments',
+                    # 'comments',
                 ]
             ])
         )

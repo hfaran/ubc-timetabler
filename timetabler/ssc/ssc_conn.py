@@ -112,7 +112,9 @@ class SSCConnection(object):
         # Get rid of the top of the page
         t = t.split("Status\nSection")[-1]
         # Get rid of the bottom of the page
-        t = "".join(t.split("Browse    Standard Timetables")[:-1])  # The list should be length 1 but "".join to do it cleanly
+        t = "".join(
+            t.split("Browse    Standard Timetables")[:-1]
+        )  # The list should be length 1 but "".join to do it cleanly
         # Strip outer stuff (newlines, spaces, etc.)
         t = t.strip(u'\n \xa0')
         # Split by newlines to start and give an almost "cell-by-cell" list for the table

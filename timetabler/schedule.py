@@ -4,6 +4,9 @@ from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
 
 
+DEBUG = True
+
+
 def check_conflict(act1, act2):
     """Checks for a scheduling conflict between two Activity instances"""
     return all([
@@ -57,8 +60,7 @@ class Schedule(object):
 
     def generate_schedules(self):
         """Generate valid schedules"""
-        # TODO: Use an actual algorithm and not something that's like n^n
-
+        # TODO: Use a legit scheduling algorithm and not brute force?
         schedules_by_course = {}
         for name, course in self.courses.items():
             acts = course.labs + course.lectures + course.tutorials
@@ -91,6 +93,6 @@ class Schedule(object):
             not check_schedule_conflicts(s)
         ])
         filtered_all_scheds = set(ifilter(filter_func, all_scheds))
-        print len(filtered_all_scheds)
+        if DEBUG: print("Found {} valid schedules.".format(len(filtered_all_scheds)))
 
         return filtered_all_scheds

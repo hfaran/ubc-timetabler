@@ -18,7 +18,7 @@ class SSCConnection(object):
         if this is set to None, cache is never automatically invalidated
     """
 
-    def __init__(self, cache_period=86400):
+    def __init__(self, cache_period=3600):
         self.base_url = "https://courses.students.ubc.ca/cs/main"
         self.cache_period = cache_period
         self.cache_path = os.path.join(

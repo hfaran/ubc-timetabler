@@ -28,7 +28,7 @@ class Schedule(object):
         schedules_by_course = {}
         for name, course in self.courses.items():
             acts = course.activities
-            r = sum(c[1] for c in course.constraints)
+            r = sum(c[1] for c in course.num_section_constraints)
             combs = combinations(acts, r)
             # Makes sure:
             # * constraints from Course are met
@@ -38,7 +38,7 @@ class Schedule(object):
             filter_func = lambda combo: all([
                 all(
                     sum(int(isinstance(act, constraint[0])) for act in combo) == constraint[1]
-                    for constraint in course.constraints
+                    for constraint in course.num_section_constraints
                 ),
                 all(act.term in self.terms for act in combo),
                 check_equal([act.term for act in combo]),

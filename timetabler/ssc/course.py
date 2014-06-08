@@ -3,7 +3,6 @@ class Course(object):
                  lectures=None, labs=None, tutorials=None, discussions=None):
         self.dept = dept
         self.number = number
-
         self.lectures = lectures if lectures else []
         assert all(isinstance(l, Lecture) for l in self.lectures)
         self.labs = labs if labs else []
@@ -12,19 +11,23 @@ class Course(object):
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
         self.discussions = discussions if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
-
-        self._constraints = None
+        self._num_section_constraints = [
+            (l[0].__class__, 1)
+            for l in [self.labs, self.lectures,
+                      self.tutorials, self.discussions]
+            if l
+        ]
 
     @property
-    def constraints(self):
-        if self._constraints is None:
-            self._constraints = [
-                (l[0].__class__, 1)
-                for l in [self.labs, self.lectures,
-                          self.tutorials, self.discussions]
-                if l
-            ]
-        return self._constraints
+    def num_section_constraints(self):
+        """List of tuples, where each tuple is
+            (Activity subtype, # of sections of that activity needed)
+        """
+        return self._num_section_constraints
+
+    @num_section_constraints.setter
+    def num_section_constraints(self, value):
+        self._num_section_constraints = value
 
     @property
     def activities(self):
@@ -69,6 +72,7 @@ class Lab(Activity):
 
 class Tutorial(Activity):
     pass
+
 
 class Discussion(Activity):
     pass

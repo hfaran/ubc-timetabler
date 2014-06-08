@@ -34,7 +34,7 @@ class Schedule(object):
             # * constraints from Course are met
             # * all activities are in terms that we want (according to self.terms)
             # * all activities themselves are in the same term
-            # * no activities are included that are Full
+            # * no activities are included that are Full/Blocked/STT
             filter_func = lambda combo: all([
                 all(
                     sum(int(isinstance(act, constraint[0])) for act in combo) == constraint[1]
@@ -42,7 +42,7 @@ class Schedule(object):
                 ),
                 all(act.term in self.terms for act in combo),
                 check_equal([act.term for act in combo]),
-                all(a.status not in [u"Full"] for a in combo),
+                all(a.status not in [u"Full", u"STT", u"Blocked"] for a in combo),
             ])
             filtered_combs = ifilter(filter_func, combs)
             # Do non-lazy set() to actually create and set schedules for course; up until this

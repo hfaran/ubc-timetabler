@@ -1,9 +1,9 @@
 class Course(object):
     def __init__(self, dept, number,
-                 lectures=None, labs=None, tutorials=None, discussions=None,
-                 custom_constraints=None):
+                 lectures=None, labs=None, tutorials=None, discussions=None):
         self.dept = dept
         self.number = number
+
         self.lectures = lectures if lectures else []
         assert all(isinstance(l, Lecture) for l in self.lectures)
         self.labs = labs if labs else []
@@ -12,7 +12,8 @@ class Course(object):
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
         self.discussions = discussions if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
-        self._constraints = custom_constraints if custom_constraints else None
+
+        self._constraints = None
 
     @property
     def constraints(self):

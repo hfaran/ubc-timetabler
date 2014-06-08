@@ -4,7 +4,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from timetabler.course import Lecture, Lab, Tutorial, Course
+from .course import Lecture, Lab, Tutorial, Course
 from timetabler.util import chunks
 
 

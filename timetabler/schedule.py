@@ -1,5 +1,4 @@
-from timetabler.course import Course, Lecture, Tutorial
-from timetabler.ssc_conn import SSCConnection
+from timetabler.ssc import SSCConnection
 
 
 class Schedule(object):

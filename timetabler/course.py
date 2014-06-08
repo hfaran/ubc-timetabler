@@ -2,10 +2,25 @@ class Activity(object):
     def __init__(self, status, section, term, days, start_time, end_time, comments):
         self.status = status  # e.g, "Restricted"
         self.section = section  # e.g., "EECE 310 L1A"
+        self.term = int(term)  # e.g., 2
         self.days = days.split()  # e.g., ["Mon", "Wed"]
         self.start_time = start_time  # e.g., "13:00"
         self.end_time = end_time
         self.comments = comments
+
+    def __repr__(self):
+        return "Lecture<" + ", ".join([
+            "{}='{}'".format(attr, getattr(self, attr)) for attr in
+            [
+                'status',
+                'section',
+                'term',
+                'days',
+                'start_time',
+                'end_time',
+                'comments',
+            ]
+        ]) + ">"
 
 
 class Lecture(Activity):

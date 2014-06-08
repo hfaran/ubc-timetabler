@@ -52,6 +52,7 @@ class SSCConnection(object):
             activity = activity_cls(
                 status=data_dict["Status"],
                 section=data_dict["Section"],
+                term=data_dict["Term"],
                 days=data_dict["Days"],
                 start_time=data_dict["Start Time"],
                 end_time=data_dict["End Time"],
@@ -100,9 +101,10 @@ class SSCConnection(object):
         current = next(itert)
         while current in attrs.keys() + [u'']:
             current = next(itert)
-        t = list(itert) + [current]
+        t = [current] + list(itert)
+        if DEBUG: print(t)
         # Create and return list of activities
-        return [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)]
+        return filter(lambda a: a is not None, [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)])
 
 
     def get_course_page(self, dept="CPSC", course="304", sessyr="2014", sesscd="W", invalidate=False):

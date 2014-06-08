@@ -37,7 +37,7 @@ class Schedule(object):
             r = sum(c[1] for c in course.num_section_constraints)
             combs = combinations(acts, r)
             # Makes sure:
-            # * constraints from Course are met
+            # * num_section_constraints from Course are met
             # * all activities are in terms that we want (according to self.terms)
             # * all activities themselves are in the same term
             # * no activities are included that are Full/Blocked

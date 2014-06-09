@@ -5,8 +5,6 @@ from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
 from timetabler.schedule import Schedule
 
-# Only touch the following line if you know what you're doing
-# ifilter = filter
 
 class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
@@ -34,8 +32,9 @@ class Scheduler(object):
     def generate_schedules(self):
         """Generate valid schedules"""
         # TODO: Use a legit scheduling algorithm and not brute force?
-        schedules_per_course = []
+        schedules_by_course = {}
         for name, course in self.courses.items():
+            logging.info("Generating schedules for {} ...".format(name))
             acts = course.activities
             r = sum(c[1] for c in course.num_section_constraints)
             combs = combinations(acts, r)
@@ -55,13 +54,12 @@ class Scheduler(object):
                 all(a.status not in [u"Full", u"Blocked"] for a in combo),
                 all(c(combo) for c in course.constraints)
             ])
-            filtered_combs = ifilter(filter_func, combs)
-            # Do non-lazy list() to actually create and set schedules for course; up until this
-            #   this point, everything has been lazy for performance
-            schedules_per_course.append(list(filtered_combs))
+            filtered_combs = filter(filter_func, combs)
+            schedules_by_course[name] = filtered_combs
+            logging.info("Schedules for {} generated.".format(name))
 
-        all_scheds = combinations(chain.from_iterable(schedules_per_course),
-                                  r=len(schedules_per_course))
+        all_scheds = combinations(chain.from_iterable(schedules_by_course.values()),
+                                  r=len(schedules_by_course))
         # Makes sure:
         # * Schedules don't have recurring courses
         # * Don't have conflicts
@@ -70,6 +68,7 @@ class Scheduler(object):
             not self._check_schedule_conflicts(s)
         ])
         filtered_all_scheds = ifilter(filter_func, all_scheds)
+        logging.info("Generating all valid schedules ...")
         schedules = [Schedule(sched) for sched in filtered_all_scheds]
         logging.info("Found {} valid schedules.".format(len(schedules)))
 

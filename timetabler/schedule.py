@@ -7,7 +7,7 @@ from timetabler.util import check_equal, all_unique
 DEBUG = True
 
 
-class Schedule(object):
+class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2)):
         """Schedule
 

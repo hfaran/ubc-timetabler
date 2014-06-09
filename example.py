@@ -1,12 +1,12 @@
 import json
 from datetime import datetime
 
-from timetabler.schedule import Schedule
+from timetabler.schedule import Scheduler
 from timetabler.ssc.course import Lecture, Discussion
 
 
 def main():
-    s = Schedule(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122"],
+    s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122"],
                  session="2014W", terms=[2])
     # STTs are for Vantage College students
     s.courses["GEOG 122"].add_constraint(

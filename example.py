@@ -30,7 +30,7 @@ if __name__ == '__main__':
         reverse=True
     )
     print("Schedule with latest starting times (sum):")
-    scheds[0].draw(term=2)
+    table = scheds[0].draw(term=2)
     print("This took {} to calculate.".format(
         datetime.now() - start_time
     ))

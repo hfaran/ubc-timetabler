@@ -1,3 +1,7 @@
+import tempfile
+import os
+from uuid import uuid4
+
 from prettytable import PrettyTable
 
 from timetabler.util import iter_time
@@ -38,11 +42,33 @@ class Schedule(object):
         else:
             return None
 
-    def draw(self, term=1):
+    def _draw(self, term=1):
         t = PrettyTable(["Time"] + DAY_LIST)
         earliest_start_time = min(a.start_time for a in self.activities)
         latest_end_time = max(a.end_time for a in self.activities)
         time_iter = iter_time(earliest_start_time, latest_end_time)
         for time in time_iter:
             t.add_row([time] + [getattr(self.activity_at_time(time, day, term), 'section', "") for day in DAY_LIST])
-        print(t)
+        return t
+
+    def draw(self, term=1, draw_location="browser"):
+        """Draw schedule
+
+        :param term: Term for which you would like to draw the schedule
+        :param draw_location: "browser"|"terminal"
+
+        :returns: The table
+        """
+        assert draw_location in ["browser", "terminal"]
+        table = self._draw(term=term)
+        if draw_location=="browser":
+            tempdir = tempfile.gettempdir()
+            tempfile_loc = os.path.join(tempdir, "ubc-timetabler_{}.html".format(uuid4().hex))
+            with open(tempfile_loc, 'w+') as f:
+                f.write(table.get_html_string(format=True))
+            import webbrowser
+            webbrowser.open('file://' + os.path.realpath(tempfile_loc))
+        elif draw_location=="terminal":
+            print(table)
+
+        return table

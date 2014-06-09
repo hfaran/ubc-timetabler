@@ -1,11 +1,9 @@
+import logging
 from itertools import combinations, chain, ifilter
 
 from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
 from timetabler.schedule import Schedule
-
-
-DEBUG = True
 
 
 class Scheduler(object):
@@ -71,7 +69,7 @@ class Scheduler(object):
         ])
         filtered_all_scheds = ifilter(filter_func, all_scheds)
         schedules = [Schedule(sched) for sched in filtered_all_scheds]
-        if DEBUG: print("Found {} valid schedules.".format(len(schedules)))
+        logging.info("Found {} valid schedules.".format(len(schedules)))
 
         return schedules
 

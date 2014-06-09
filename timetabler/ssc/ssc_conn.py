@@ -1,14 +1,12 @@
 import os
 import time
+import logging
 
 import requests
 from bs4 import BeautifulSoup
 
 from .course import Lecture, Lab, Tutorial, Course, Discussion
 from timetabler.util import chunks
-
-
-DEBUG = True
 
 
 class SSCConnection(object):
@@ -96,7 +94,7 @@ class SSCConnection(object):
                     u'Discussion': Discussion
                 }[data_dict["Activity"]]
             except KeyError:
-                if DEBUG: print("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
+                logging.info("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
                 return None
             # Create and return activity
             activity = activity_cls(
@@ -128,7 +126,7 @@ class SSCConnection(object):
         while current in attrs.keys() + [u'']:
             current = next(itert)
         t = [current] + list(itert)
-        if DEBUG: print(t)
+        logging.info(t)
         # Create and return list of activities
         return filter(lambda a: a is not None, [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)])
 
@@ -151,7 +149,7 @@ class SSCConnection(object):
         page = self._retrieve_cached_page(page_name, invalidate=invalidate)
         # If not already cached, retrieve, cache, and return
         if page is None:
-            if DEBUG: print("Page was not found in cache or was invalidated; retrieving from remote and caching...")
+            logging.info("Page was not found in cache or was invalidated; retrieving from remote and caching...")
             r = requests.get(self.base_url, params=dict(
                 pname="subjarea",
                 tname="subjareas",
@@ -165,7 +163,7 @@ class SSCConnection(object):
             self._cache_page(page_name, page_data)
             return page_data
         else:
-            if DEBUG: print("Valid existing page was found in cache; retrieving from file...")
+            logging.info("Valid existing page was found in cache; retrieving from file...")
             return page
 
     def _cache_page(self, name, text):
@@ -183,7 +181,7 @@ class SSCConnection(object):
         # Check if existing cache is stale
         last_modified = os.path.getmtime(filename)
         period = time.time() - last_modified
-        if DEBUG: print("Page was last fetched {:.0f} seconds ago.".format(period))
+        logging.info("Page was last fetched {:.0f} seconds ago.".format(period))
         # If cache is stale, or an invalidation was requested, remove
         if any([(self.cache_period) and (period > self.cache_period), invalidate]):
             os.remove(filename)

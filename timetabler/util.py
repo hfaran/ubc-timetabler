@@ -46,6 +46,32 @@ def all_unique(x):
     return not any(i in seen or seen.add(i) for i in x)
 
 
+def iter_time(start, end):
+    """Returns an iterator that gives a range of half-hourly time
+        from ``start`` (inclusive) to ``end`` (exclusive)
+
+    >>> list(iter_time("09:00", "12:30"))
+    ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00']
+    """
+    def time2tuple(t):
+        return tuple(map(int, t.split(":")))
+
+    def tuple2time(t):
+        return ":".join([str(i).zfill(2) for i in t])
+
+    current = start
+    while current < end:
+        # Put yield at the time because we do inclusive start, exclusive stop
+        yield current
+        _current = time2tuple(current)
+        if _current[1] == 30:
+            _current = (_current[0]+1, 0)
+        else:
+            _current = (_current[0], 30)
+        current = tuple2time(_current)
+
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

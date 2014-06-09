@@ -56,8 +56,9 @@ class Activity(object):
         self.section = section  # e.g., "EECE 310 L1A"
         self.term = int(term)  # e.g., 2
         self.days = set(days.split())  # e.g., {"Mon", "Wed"}
-        self.start_time = start_time  # e.g., "13:00"
-        self.end_time = end_time
+        # zfilling is important so that > and < comparison operators work
+        self.start_time = start_time.zfill(5)  # e.g., "13:00"
+        self.end_time = end_time.zfill(5)
         self.comments = comments
 
     def __repr__(self):

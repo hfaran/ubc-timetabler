@@ -36,3 +36,4 @@ if __name__ == '__main__':
     print("This took {} to calculate.".format(
         datetime.now() - start_time
     ))
+    scheds[0].draw()

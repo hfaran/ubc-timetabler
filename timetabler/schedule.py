@@ -1,3 +1,9 @@
+from prettytable import PrettyTable
+
+
+DAY_LIST = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
+
 class Schedule(object):
     def __init__(self, sched):
         """Schedule
@@ -12,3 +18,26 @@ class Schedule(object):
         """
         self._sched = sched
         self.activities = [act for crs in sched for act in crs]
+
+    def activities_for_day(self, day):
+        return [a for a in self.activities if day in a.days]
+
+    def activity_at_time(self, time="09:00", day="Mon", term=1):
+        res = [a for a in self.activities if all([
+            a.start_time <= time,
+            a.end_time > time,
+            day in a.days,
+            term == a.term
+        ])]
+        assert len(res) in [0, 1], ("More than one activity found at specified time. "
+                                    "This likely means the code is wrong.")
+        if res:
+            return res[0]
+        else:
+            return None
+
+
+    def draw(self):
+        t = PrettyTable(DAY_LIST)
+        earliest_start_time = min(a.start_time for a in self.activities)
+        latest_end_time = max(a.end_time for a in self.activities)

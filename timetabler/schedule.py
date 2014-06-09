@@ -66,22 +66,24 @@ class Schedule(object):
             tempfile_loc = os.path.join(tempdir, "ubc-timetabler_{}.html".format(uuid4().hex))
             with open(tempfile_loc, 'w+') as f:
                 html = "{}{}{}".format(
-"""<html>
+                """<html>
 
-	<head>
-		<!-- Bring to you by http://www.CSSTableGenerator.com -->
-		<link rel="stylesheet" href="https://raw.githubusercontent.com/hfaran/ubc-timetabler/master/css/table.css" type="text/css"/>
-	</head>
+                    <head>
+                        <!-- Bring to you by http://www.CSSTableGenerator.com -->
+                        <link rel="stylesheet" \
+                        href="https://raw.githubusercontent.com/hfaran/ubc-timetabler/master/css/table.css" \
+                        type="text/css"/>
+                    </head>
 
-	<body>
+                    <body>
 
-		<div class="CSSTableGenerator">""",
-table.get_html_string(),
-"""		</div>
+                        <div class="CSSTableGenerator">""",
+                table.get_html_string(),
+                """	    </div>
 
-	</body>
+                    </body>
 
-</html>"""
+                </html>"""
                 )
                 f.write(html)
             import webbrowser

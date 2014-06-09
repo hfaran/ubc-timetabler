@@ -5,7 +5,7 @@ from timetabler.ssc.course import Lecture, Discussion
 
 
 def main():
-    s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122"],
+    s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "CPSC 317", "GEOG 122"],
                  session="2014W", terms=[2], refresh=False)
     # STTs are for Vantage College students
     s.courses["GEOG 122"].add_constraint(
@@ -24,13 +24,17 @@ if __name__ == '__main__':
     scheds = main()
     # Sort so that the sum of starting times for courses
     #   throughout the week are greatest
+    key = lambda s: sum(int(a.start_time.replace(":", "")) for a in s.activities)
     scheds = sorted(
         scheds,
-        key=lambda s: sum(int(a.start_time.replace(":", "")) for a in s.activities),
+        key=key,
         reverse=True
     )
-    print("Schedule with latest starting times (sum):")
-    table = scheds[0].draw(term=2)
+    print("There were {} valid schedules found.".format(len(scheds)))
+    print("Schedule with latest starting times...")
     print("This took {} to calculate.".format(
         datetime.now() - start_time
     ))
+    for sched in scheds:
+        sched.draw(term=2)
+        raw_input("Press ENTER to display the next schedule...")

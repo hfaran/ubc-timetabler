@@ -6,7 +6,7 @@ from timetabler import sort
 
 
 def main():
-    courses = ["EECE 353", "CPSC 304", "EECE 381", "GEOG 122", "CPSC 420"]
+    courses = ["EECE 353", "CPSC 304", "EECE 381", "EECE 450", "GEOG 122"]
     s = Scheduler(courses, session="2014W", terms=[2], refresh=False)
 
     if "GEOG 122" in courses:

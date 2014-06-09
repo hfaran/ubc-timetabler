@@ -5,6 +5,8 @@ from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
 from timetabler.schedule import Schedule
 
+# Only touch the following line if you know what you're doing
+# ifilter = filter
 
 class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
@@ -32,7 +34,7 @@ class Scheduler(object):
     def generate_schedules(self):
         """Generate valid schedules"""
         # TODO: Use a legit scheduling algorithm and not brute force?
-        schedules_by_course = {}
+        schedules_per_course = []
         for name, course in self.courses.items():
             acts = course.activities
             r = sum(c[1] for c in course.num_section_constraints)
@@ -56,10 +58,10 @@ class Scheduler(object):
             filtered_combs = ifilter(filter_func, combs)
             # Do non-lazy list() to actually create and set schedules for course; up until this
             #   this point, everything has been lazy for performance
-            schedules_by_course[name] = list(filtered_combs)
+            schedules_per_course.append(list(filtered_combs))
 
-        all_scheds = combinations(chain.from_iterable(schedules_by_course.values()),
-                                  r=len(schedules_by_course))
+        all_scheds = combinations(chain.from_iterable(schedules_per_course),
+                                  r=len(schedules_per_course))
         # Makes sure:
         # * Schedules don't have recurring courses
         # * Don't have conflicts

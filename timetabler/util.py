@@ -8,6 +8,8 @@ DAY_LIST = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 # Helpers #
 ###########
 
+# General
+
 def chunks(l, n):
     """Yields successive ``n``-sized chunks from ``l``
 
@@ -55,6 +57,8 @@ def all_unique(x):
     seen = set()
     return not any(i in seen or seen.add(i) for i in x)
 
+
+# timetabler-specific helpers
 
 def strtime2num(s):
     """Turns ``s`` like "09:00" to 9.5"""

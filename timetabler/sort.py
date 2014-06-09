@@ -29,3 +29,7 @@ def least_time_at_school(schedules):
         return total
 
     return sorted(schedules, key=key)
+
+#
+# def even_time_per_day(schedules):
+#     def key(s):

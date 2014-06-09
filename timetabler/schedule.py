@@ -8,7 +8,7 @@ DEBUG = True
 
 
 class Scheduler(object):
-    def __init__(self, courses, session="2014W", terms=(1, 2)):
+    def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
         """Schedule
 
         :type  courses: list
@@ -18,9 +18,11 @@ class Scheduler(object):
         :type  terms: tuple|list
         :param terms: List of terms you want to schedule courses in;
             i.e., [1] for only first term, [1, 2] for whole session etc.
+        :param refresh: Invalidate all cached data for relevant courses
         """
         self.ssc_conn = SSCConnection()
-        self.courses = {c: self.ssc_conn.get_course(c, session) for c in courses}
+        self.courses = {c: self.ssc_conn.get_course(c, session, refresh=refresh)
+                        for c in courses}
         self.terms = terms
         self.session = session
 

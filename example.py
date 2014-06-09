@@ -7,7 +7,7 @@ from timetabler.ssc.course import Lecture, Discussion
 
 def main():
     s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122"],
-                 session="2014W", terms=[2])
+                 session="2014W", terms=[2], refresh=True)
     # STTs are for Vantage College students
     s.courses["GEOG 122"].add_constraint(
         lambda acts: all(a.status not in [u"STT"] for a in acts)

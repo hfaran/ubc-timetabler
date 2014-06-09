@@ -32,10 +32,10 @@ class SSCConnection(object):
     # Public Methods #
     ##################
 
-    def get_course(self, course_name="CPSC 304", session="2014W"):
+    def get_course(self, course_name="CPSC 304", session="2014W", refresh=False):
         dept, course_num = course_name.split()
         sessyr, sesscd = session[:4], session[-1]
-        page = self._get_course_page(dept, course_num, sessyr, sesscd)
+        page = self._get_course_page(dept, course_num, sessyr, sesscd, invalidate=refresh)
         activities = self._activities_from_page(page)
 
         lectures = [a for a in activities if isinstance(a, Lecture)]

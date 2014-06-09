@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from timetabler.scheduler import Scheduler
@@ -30,10 +29,8 @@ if __name__ == '__main__':
         key=lambda s: sum(int(a.start_time.replace(":", "")) for a in s.activities),
         reverse=True
     )
-    print("Schedule with latest starting times (sum): {}".format(
-        json.dumps([repr(s) for s in scheds[0].activities], indent=4)
-    ))
+    print("Schedule with latest starting times (sum):")
+    scheds[0].draw(term=2)
     print("This took {} to calculate.".format(
         datetime.now() - start_time
     ))
-    scheds[0].draw()

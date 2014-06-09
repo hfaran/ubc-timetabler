@@ -1,5 +1,7 @@
 from prettytable import PrettyTable
 
+from timetabler.util import iter_time
+
 
 DAY_LIST = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 
@@ -36,8 +38,11 @@ class Schedule(object):
         else:
             return None
 
-
-    def draw(self):
-        t = PrettyTable(DAY_LIST)
+    def draw(self, term=1):
+        t = PrettyTable(["Time"] + DAY_LIST)
         earliest_start_time = min(a.start_time for a in self.activities)
         latest_end_time = max(a.end_time for a in self.activities)
+        time_iter = iter_time(earliest_start_time, latest_end_time)
+        for time in time_iter:
+            t.add_row([time] + [getattr(self.activity_at_time(time, day, term), 'section', "") for day in DAY_LIST])
+        print(t)

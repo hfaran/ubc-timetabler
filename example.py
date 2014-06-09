@@ -6,7 +6,7 @@ from timetabler import sort
 
 
 def main():
-    s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122"],
+    s = Scheduler(["EECE 353", "CPSC 304", "EECE 381", "GEOG 122", "CPSC 317"],
                   session="2014W", terms=[2], refresh=False)
     # STTs are for Vantage College students
     s.courses["GEOG 122"].add_constraint(
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         datetime.now() - start_time
     ))
     # Sort and draw
-    scheds = sort.sum_latest_start_times(scheds)
+    scheds = sort.least_time_at_school(scheds)
     for sched in scheds:
         sched.draw(term=2)
         raw_input("Press ENTER to display the next schedule...")

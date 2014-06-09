@@ -1,3 +1,13 @@
+#############
+# Constants #
+#############
+
+DAY_LIST = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
+###########
+# Helpers #
+###########
+
 def chunks(l, n):
     """Yields successive ``n``-sized chunks from ``l``
 
@@ -46,6 +56,16 @@ def all_unique(x):
     return not any(i in seen or seen.add(i) for i in x)
 
 
+def strtime2num(s):
+    """Turns ``s`` like "09:00" to 9.5"""
+    t = s.split(":")
+    t = map(int, t)
+    if t[1] == 30:
+        return t[0] + 0.5
+    else:
+        return t[0]
+
+
 def iter_time(start, end):
     """Returns an iterator that gives a range of half-hourly time
         from ``start`` (inclusive) to ``end`` (exclusive)
@@ -53,6 +73,7 @@ def iter_time(start, end):
     >>> list(iter_time("09:00", "12:30"))
     ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00']
     """
+
     def time2tuple(t):
         return tuple(map(int, t.split(":")))
 
@@ -65,7 +86,7 @@ def iter_time(start, end):
         yield current
         _current = time2tuple(current)
         if _current[1] == 30:
-            _current = (_current[0]+1, 0)
+            _current = (_current[0] + 1, 0)
         else:
             _current = (_current[0], 30)
         current = tuple2time(_current)

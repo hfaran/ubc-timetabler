@@ -4,10 +4,7 @@ from uuid import uuid4
 
 from prettytable import PrettyTable
 
-from timetabler.util import iter_time
-
-
-DAY_LIST = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+from timetabler.util import iter_time, DAY_LIST
 
 
 class Schedule(object):

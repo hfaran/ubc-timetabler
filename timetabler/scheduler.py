@@ -1,4 +1,5 @@
 import logging
+import string
 from itertools import combinations, chain, ifilter
 
 from timetabler.ssc import SSCConnection
@@ -31,7 +32,6 @@ class Scheduler(object):
 
     def generate_schedules(self):
         """Generate valid schedules"""
-        # TODO: Use a legit scheduling algorithm and not brute force?
         schedules_by_course = {}
         for name, course in self.courses.items():
             logging.info("Generating schedules for {} ...".format(name))
@@ -58,15 +58,16 @@ class Scheduler(object):
             schedules_by_course[name] = filtered_combs
             logging.info("Schedules for {} generated.".format(name))
 
-        all_scheds = combinations(chain.from_iterable(schedules_by_course.values()),
-                                  r=len(schedules_by_course))
+        # Get all combinations (so all possible schedules); but we still need to check for conflicts
+        all_scheds = self._generate_combinations(schedules_by_course)
         # Makes sure:
         # * Schedules don't have recurring courses
         # * Don't have conflicts
         filter_func = lambda s: all([
-            all_unique(a.section for t in s for a in t),
+            # all_unique(a.section for t in s for a in t),  # This seems to be unnecessary
             not self._check_schedule_conflicts(s)
         ])
+        # Now we filter away all schedules that have conflicts
         filtered_all_scheds = ifilter(filter_func, all_scheds)
         logging.info("Generating all valid schedules ...")
         schedules = [Schedule(sched) for sched in filtered_all_scheds]
@@ -77,6 +78,46 @@ class Scheduler(object):
     ###################
     # Private Methods #
     ###################
+
+    def _generate_combinations(self, scheds_by_course):
+        """Generate all possible schedules given ``scheds_by_course``
+
+        :type  scheds_by_course: dict
+        :param scheds_by_course: Dictionary of possible schedules by course
+        :rtype: list
+        :return: Combination of all schedules
+        """
+        if not scheds_by_course:
+            return []
+
+        # This is the part where generate nested for loops
+        code = []
+        var_names = iter(string.ascii_lowercase)
+        for i, name in enumerate(scheds_by_course):
+            c = "{}for {} in scheds_by_course['{}']:".format(i*4*" ", next(var_names), name)
+            code.append(c)
+        # Add on the line that appends to schedules
+        var_names = iter(string.ascii_lowercase)
+        code.append("{}schedules.append([{}])".format(
+            (i+1)*4*" ",
+            ", ".join([next(var_names) for i in xrange(i+1)])
+        ))
+        # Make it a string
+        code_to_exec = "\n".join(code)
+        logging.info("Generated code to execute:\n{}".format(code_to_exec))
+        # Ends up looking something like this:
+        # for a in scheds_by_course['EECE 381']:
+        #     for b in scheds_by_course['EECE 353']:
+        #         for c in scheds_by_course['GEOG 122']:
+        #             for d in scheds_by_course['CPSC 304']:
+        #                 for e in scheds_by_course['EECE 450']:
+        #                     schedules.append([a, b, c, d, e])
+
+        # Let the magic work
+        schedules = []
+        exec code_to_exec
+        return schedules
+
 
     @classmethod
     def _check_conflict(cls, act1, act2):

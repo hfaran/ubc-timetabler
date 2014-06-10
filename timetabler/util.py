@@ -1,3 +1,8 @@
+from __future__ import division
+
+from math import sqrt
+
+
 #############
 # Constants #
 #############
@@ -56,6 +61,25 @@ def all_unique(x):
     """
     seen = set()
     return not any(i in seen or seen.add(i) for i in x)
+
+
+def stddev(lst):
+    """Calculate **population** (not sample) standard deviation of ``lst``
+
+    :type  lst: list
+    :param lst: List of numbers
+    :returns: standard deviation of ``lst``
+    :rtype: float
+
+    >>> act = stddev([13,25,46,255,55])
+    >>> exp = 89.34517334
+    >>> abs(act - exp) < 1E-6
+    True
+    """
+    points = len(lst)
+    mean = sum(lst)/points
+    variance = sum((i - mean)**2 for i in lst)/points
+    return sqrt(variance)
 
 
 # timetabler-specific helpers

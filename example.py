@@ -45,8 +45,9 @@ if __name__ == '__main__':
         datetime.now() - start_time
     ))
     # Sort and draw
-    scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.least_time_at_school(scheds)
+    scheds = sort.even_time_per_day(scheds)
+    scheds = sort.sum_latest_daily_morning(scheds)
 
     for sched in scheds:
         sched.draw(term=2)

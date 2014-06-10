@@ -25,6 +25,7 @@ class Scheduler(object):
                         for c in courses}
         self.terms = terms
         self.session = session
+        self._constraints = []
 
     ##################
     # Public Methods #
@@ -71,9 +72,22 @@ class Scheduler(object):
         filtered_all_scheds = ifilter(filter_func, all_scheds)
         logging.info("Generating all valid schedules ...")
         schedules = [Schedule(sched) for sched in filtered_all_scheds]
+        # Now we filter away all the schedules that don't obey constraints
+        filter_func = lambda s: all(c(s) for c in self._constraints)
+        schedules = filter(filter_func, schedules)
         logging.info("Found {} valid schedules.".format(len(schedules)))
 
         return schedules
+
+    def add_constraint(self, constraint):
+        """Add constraint ``constraint`` to list of constraints
+
+        :type  constraint: callable
+        :param constraint: A callable that takes a Schedule
+            and returns True or False depending on where
+            a constraint is met
+        """
+        self._constraints.append(constraint)
 
     ###################
     # Private Methods #

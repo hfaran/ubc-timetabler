@@ -4,16 +4,27 @@ from itertools import combinations
 from timetabler.scheduler import Scheduler
 from timetabler.ssc.course import Lecture, Discussion
 from timetabler import sort
+from timetabler.sort import earliest_start  # Helper function (should probably be in util)
 
 
 def main():
     required = ("EECE 353", "CPSC 304", "EECE 381")
-    opt = [ "CPSC 420", "GEOG 122", "EECE 450", "CPSC 317", "EECE 411", "CPSC 322"]
+    opt = [
+        "CPSC 420",
+        "GEOG 122",
+        "EECE 450",
+        "CPSC 322",
+        "CPSC 317",
+        # "EECE 411",  # If this is selected, it and CPSC317 can be the only, b/c 317 is a co-req
+    ]
     combs = combinations(opt, r=2)
 
     schedules = []
     for courses in [required + comb for comb in combs]:
         s = Scheduler(courses, session="2014W", terms=[2], refresh=False)
+        # I don't want any classes that start before 9:00AM
+        s.add_constraint(lambda sched: earliest_start(sched.activities) >= 9)
+        # Add GEOG122 constraints if we need to
         if "GEOG 122" in courses:
             # STTs are for Vantage College students
             s.courses["GEOG 122"].add_constraint(
@@ -51,9 +62,8 @@ if __name__ == '__main__':
     ))
     # Sort and draw
     scheds = sort.least_time_at_school(scheds)
-    scheds = sort.even_time_per_day(scheds)
     scheds = sort.sum_latest_daily_morning(scheds)
-
+    scheds = sort.even_time_per_day(scheds)
     for sched in scheds:
         sched.draw(term=2)
         raw_input("Press ENTER to display the next schedule...")

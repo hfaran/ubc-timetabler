@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import combinations
 
 from timetabler.scheduler import Scheduler
 from timetabler.ssc.course import Lecture, Discussion
@@ -6,21 +7,25 @@ from timetabler import sort
 
 
 def main():
-    courses = ["EECE 353", "CPSC 304", "EECE 381", "CPSC 322", "GEOG 122"]
-    s = Scheduler(courses, session="2014W", terms=[2], refresh=False)
+    required = ("EECE 353", "CPSC 304", "EECE 381")
+    opt = [ "CPSC 420", "GEOG 122", "EECE 450", "CPSC 317", "EECE 411", "CPSC 322"]
+    combs = combinations(opt, r=2)
 
-    if "GEOG 122" in courses:
-        # STTs are for Vantage College students
-        s.courses["GEOG 122"].add_constraint(
-            lambda acts: all(a.status not in [u"STT"] for a in acts)
-        )
-        # Default sections contained a Tutorial but that is for Vantage
-        # students, so removing that and only setting Lecture and Discussion
-        s.courses["GEOG 122"].num_section_constraints = [
-            (Lecture, 1), (Discussion, 1)
-        ]
-
-    return s.generate_schedules()
+    schedules = []
+    for courses in [required + comb for comb in combs]:
+        s = Scheduler(courses, session="2014W", terms=[2], refresh=False)
+        if "GEOG 122" in courses:
+            # STTs are for Vantage College students
+            s.courses["GEOG 122"].add_constraint(
+                lambda acts: all(a.status not in [u"STT"] for a in acts)
+            )
+            # Default sections contained a Tutorial but that is for Vantage
+            # students, so removing that and only setting Lecture and Discussion
+            s.courses["GEOG 122"].num_section_constraints = [
+                (Lecture, 1), (Discussion, 1)
+            ]
+        schedules.extend(s.generate_schedules())
+    return schedules
 
 
 if __name__ == '__main__':

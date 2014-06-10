@@ -11,7 +11,7 @@ class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
         """Schedule
 
-        :type  courses: list
+        :type  courses: list|tuple
         :param courses: ["CPSC 304", ...]
         :type  session: str|unicode
         :param session: Session you want to schedule for

@@ -1,3 +1,5 @@
+# NOTE: This is a WIP and DOES NOT work yet/is not complete.
+
 import kivy
 
 kivy.require('1.8.0')

@@ -3,7 +3,7 @@ from itertools import combinations
 
 from timetabler.scheduler import Scheduler
 from timetabler.ssc.course import Lecture, Discussion
-from timetabler import sort
+from timetabler import sort, util
 from timetabler.sort import earliest_start  # Helper function (should probably be in util)
 
 
@@ -21,7 +21,7 @@ def main():
 
     schedules = []
     for courses in [required + comb for comb in combs]:
-        s = Scheduler(courses, session="2014W", terms=[2], refresh=False)
+        s = Scheduler(courses, session="2014W", terms=[2], refresh=True)
         # I don't want any classes that start before 9:00AM
         s.add_constraint(lambda sched: earliest_start(sched.activities) >= 9)
         # Add GEOG122 constraints if we need to
@@ -41,17 +41,7 @@ def main():
 
 if __name__ == '__main__':
     # Setup logging
-    import logging
-    import sys
-
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    root.addHandler(ch)
+    util.setup_root_logger()
 
     # Get schedules (time operation)
     start_time = datetime.now()
@@ -61,6 +51,7 @@ if __name__ == '__main__':
         datetime.now() - start_time
     ))
     # Sort and draw
+    # TODO: Add something representing travel time to sort functions that need it
     scheds = sort.even_time_per_day(scheds)
     scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.least_time_at_school(scheds)

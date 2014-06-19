@@ -82,6 +82,20 @@ def stddev(lst):
     return sqrt(variance)
 
 
+def setup_root_logger():
+    import logging
+    import sys
+
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+
+
 # timetabler-specific helpers
 
 def strtime2num(s):

@@ -60,6 +60,11 @@ def even_time_per_day(schedules):
     return sorted(schedules, key=key)
 
 
+def free_days(schedules):
+    """Optimizes for days off (i.e., no classes on that day)"""
+    return sorted(schedules, key=lambda s: sum(1 for day in DAY_LIST if s.activities_for_day(day)))
+
+
 ###########
 # Helpers #
 ###########

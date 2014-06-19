@@ -11,13 +11,13 @@ def main():
     required = ("EECE 353", "CPSC 304", "EECE 381")
     opt = [
         "CPSC 420",
-        "GEOG 122",
+        # "GEOG 122",  # Taking CIVL200 in T1, so don't need this anymore
         "EECE 450",
         "CPSC 322",
         "CPSC 317",
         # "EECE 411",  # If this is selected, it and CPSC317 can be the only, b/c 317 is a co-req
     ]
-    combs = combinations(opt, r=2)
+    combs = combinations(opt, r=1)
 
     schedules = []
     for courses in [required + comb for comb in combs]:
@@ -65,5 +65,5 @@ if __name__ == '__main__':
     scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.even_time_per_day(scheds)
     for sched in scheds:
-        sched.draw(term=2)
+        sched.draw(term=2, draw_location="browser")
         raw_input("Press ENTER to display the next schedule...")

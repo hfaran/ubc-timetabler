@@ -1,4 +1,5 @@
 """This module contains common sorting functions useful for sorting schedules"""
+from __future__ import division
 
 from timetabler.util import DAY_LIST, strtime2num, stddev
 
@@ -8,11 +9,15 @@ def sum_latest_daily_morning(schedules):
 
     def key(s):
         total = 0
+        num_days = 0
         for day in DAY_LIST:
             acts = s.activities_for_day(day)
+            if not acts:
+                continue  # It's a free day!
             earliest_start_time = earliest_start(acts)
             total += earliest_start_time
-        return total
+            num_days += 1
+        return total/num_days
 
     return sorted(schedules, key=key, reverse=True)
 
@@ -22,6 +27,8 @@ def least_time_at_school(schedules):
         total = 0
         for day in DAY_LIST:
             acts = s.activities_for_day(day)
+            if not acts:
+                continue  # It's a free day!
             earliest_start_time = earliest_start(acts)
             latest_end_time = latest_end(acts)
             time_at_school = latest_end_time - earliest_start_time
@@ -42,6 +49,8 @@ def even_time_per_day(schedules):
         time_at_school_week = []
         for day in DAY_LIST:
             acts = s.activities_for_day(day)
+            if not acts:
+                continue  # It's a free day!
             earliest_start_time = earliest_start(acts)
             latest_end_time = latest_end(acts)
             time_at_school = latest_end_time - earliest_start_time

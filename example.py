@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 from datetime import datetime
 from itertools import combinations
 
@@ -64,7 +66,7 @@ if __name__ == '__main__':
     scheds = sort.even_time_per_day(scheds, commute_hrs=COMMUTE_HOURS)
     scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.least_time_at_school(scheds, commute_hrs=COMMUTE_HOURS)
-    for sched in scheds:
-        for term in TERMS:
-            sched.draw(term=term, draw_location="terminal")
-        raw_input("Press ENTER to display the next schedule...")
+    for i, sched in enumerate(scheds):
+        sched.draw(terms=TERMS, draw_location="terminal")
+        if i < len(scheds) - 1:
+            raw_input("Press ENTER to display the next schedule...")

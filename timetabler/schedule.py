@@ -48,16 +48,24 @@ class Schedule(object):
             t.add_row([time] + [getattr(self.activity_at_time(time, day, term), 'section', "") for day in DAY_LIST])
         return t
 
-    def draw(self, term=1, draw_location="browser"):
+    def _create_table_div(self, table):
+        return "\n{}\n{}\n{}\n".format(
+            '<div class="CSSTableGenerator">',
+            table.get_html_string(),
+            '</div>'
+        )
+
+    def draw(self, terms=(1,), draw_location="browser"):
         """Draw schedule
 
-        :param term: Term for which you would like to draw the schedule
+        :type terms: tuple or list
+        :param term: Terms for which you would like to draw the schedule
         :param draw_location: "browser"|"terminal"
-
-        :returns: The table
+        :returns: List of tables
+        :rtype: list
         """
         assert draw_location in ["browser", "terminal"]
-        table = self._draw(term=term)
+        tables = map(self._draw, terms)
         if draw_location=="browser":
             tempdir = tempfile.gettempdir()
             tempfile_loc = os.path.join(tempdir, "ubc-timetabler_{}.html".format(uuid4().hex))
@@ -73,11 +81,9 @@ class Schedule(object):
                     </head>
 
                     <body>
-
-                        <div class="CSSTableGenerator">""",
-                table.get_html_string(),
-                """	    </div>
-
+                    """,
+                "</br></br></br>\n".join(map(self._create_table_div, tables)),
+                """
                     </body>
 
                 </html>"""
@@ -86,6 +92,7 @@ class Schedule(object):
             import webbrowser
             webbrowser.open('file://' + os.path.realpath(tempfile_loc))
         elif draw_location=="terminal":
-            print(table)
+            for table in tables:
+                print(table)
 
-        return table
+        return tables

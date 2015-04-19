@@ -7,6 +7,9 @@ from timetabler import sort, util
 from timetabler.sort import earliest_start  # Helper function (should probably be in util)
 
 
+COMMUTE_HOURS = 1.75
+
+
 def main():
     required = ("EECE 353", "CPSC 304", "EECE 381")
     opt = [
@@ -51,10 +54,9 @@ if __name__ == '__main__':
         datetime.now() - start_time
     ))
     # Sort and draw
-    # TODO: Add something representing travel time to sort functions that need it
-    scheds = sort.even_time_per_day(scheds)
+    scheds = sort.even_time_per_day(scheds, commute_hrs=COMMUTE_HOURS)
     scheds = sort.sum_latest_daily_morning(scheds)
-    scheds = sort.least_time_at_school(scheds)
+    scheds = sort.least_time_at_school(scheds, commute_hrs=COMMUTE_HOURS)
     scheds = sort.free_days(scheds)
     for sched in scheds:
         sched.draw(term=2, draw_location="browser")

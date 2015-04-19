@@ -31,7 +31,7 @@ class Scheduler(object):
     # Public Methods #
     ##################
 
-    def generate_schedules(self):
+    def generate_schedules(self, bad_statuses=("Full", "Blocked")):
         """Generate valid schedules"""
         schedules_by_course = {}
         for name, course in self.courses.items():
@@ -52,7 +52,7 @@ class Scheduler(object):
                 ),
                 all(act.term in self.terms for act in combo),
                 check_equal([act.term for act in combo]),
-                all(a.status not in [u"Full", u"Blocked"] for a in combo),
+                all(a.status not in bad_statuses for a in combo),
                 all(c(combo) for c in course.constraints)
             ])
             filtered_combs = filter(filter_func, combs)

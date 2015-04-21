@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+from itertools import chain
 
 import requests
 from bs4 import BeautifulSoup
@@ -72,8 +73,8 @@ class SSCConnection(object):
             u'Comments': 14
         }
 
-        def activity_from_data(data):
-            """Return an ``Activity`` subclass generated from ``data``"""
+        def activities_from_data(data):
+            """Return list of ``Activity`` subclasses generated from ``data``"""
             # Make copy
             data = data[:]
             # Fill in anything missing with empty string
@@ -95,18 +96,24 @@ class SSCConnection(object):
                 }[data_dict["Activity"]]
             except KeyError:
                 logging.info("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
-                return None
-            # Create and return activity
-            activity = activity_cls(
-                status=data_dict["Status"],
-                section=data_dict["Section"],
-                term=data_dict["Term"],
-                days=data_dict["Days"],
-                start_time=data_dict["Start Time"],
-                end_time=data_dict["End Time"],
-                comments=data_dict["Comments"]
-            )
-            return activity
+                return []
+            # Create and return activity (or two if in both terms)
+            terms = map(int, data_dict["Term"].split('-'))
+            is_multi_term = len(terms) >= 2
+            activities = []
+            for term in terms:
+                activity = activity_cls(
+                    status=data_dict["Status"],
+                    section=data_dict["Section"],
+                    term=term,
+                    days=data_dict["Days"],
+                    start_time=data_dict["Start Time"],
+                    end_time=data_dict["End Time"],
+                    comments=data_dict["Comments"],
+                    is_multi_term=is_multi_term
+                )
+                activities.append(activity)
+            return activities
 
         soup = BeautifulSoup(page)
         t = soup.text
@@ -128,7 +135,10 @@ class SSCConnection(object):
         t = [current] + list(itert)
         logging.info(t)
         # Create and return list of activities
-        return filter(lambda a: a is not None, [activity_from_data(data_chunk) for data_chunk in chunks(t, 15)])
+        return list(chain.from_iterable(
+            activities_from_data(data_chunk)
+            for data_chunk in chunks(t, 15)
+        ))
 
 
     def _get_course_page(self, dept="CPSC", course_num="304", sessyr="2014", sesscd="W", invalidate=False):

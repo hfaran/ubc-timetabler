@@ -51,7 +51,8 @@ class Course(object):
 
 
 class Activity(object):
-    def __init__(self, status, section, term, days, start_time, end_time, comments):
+    def __init__(self, status, section, term, days, start_time, end_time,
+                 comments, is_multi_term):
         self.status = status  # e.g, "Restricted"
         self.section = section  # e.g., "EECE 310 L1A"
         self.term = int(term)  # e.g., 2
@@ -60,6 +61,7 @@ class Activity(object):
         self.start_time = start_time.zfill(5)  # e.g., "13:00"
         self.end_time = end_time.zfill(5)
         self.comments = comments
+        self.is_multi_term = is_multi_term  # boolean
 
     def __repr__(self):
         return "{}<{}>".format(

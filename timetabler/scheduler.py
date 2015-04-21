@@ -42,7 +42,7 @@ class Scheduler(object):
             # Makes sure:
             # * num_section_constraints from Course are met
             # * all activities are in terms that we want (according to self.terms)
-            # * all activities themselves are in the same term
+            # * all activities themselves are in the same term (UNLESS they're multiterm)
             # * no activities are included that are Full/Blocked
             # * all constraints from the course are satisfied
             filter_func = lambda combo: all([
@@ -51,7 +51,8 @@ class Scheduler(object):
                     for constraint in course.num_section_constraints
                 ),
                 all(act.term in self.terms for act in combo),
-                check_equal([act.term for act in combo]),
+                (check_equal([act.term for act in combo]) or
+                 any(act.is_multi_term for act in combo)),
                 all(a.status not in bad_statuses for a in combo),
                 all(c(combo) for c in course.constraints)
             ])

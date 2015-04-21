@@ -19,7 +19,7 @@ def main():
         "CPEN 321",
         "CPEN 421",
         "CPEN 422",
-        # "EECE 419",
+        "CPEN 492",
         "CPEN 481",
         "APSC 450"
     )
@@ -27,7 +27,7 @@ def main():
         "CPEN 442",
         "CPSC 312"
     ]
-    num_required_from_opt = 2
+    num_required_from_opt = 0
     combs = combinations(opt, r=num_required_from_opt)
 
     schedules = []

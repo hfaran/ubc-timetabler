@@ -1,6 +1,6 @@
 import logging
 import string
-from itertools import combinations, chain, ifilter
+from itertools import combinations, chain, ifilter, product
 
 from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
@@ -105,32 +105,7 @@ class Scheduler(object):
         if not scheds_by_course:
             return []
 
-        # This is the part where generate nested for loops
-        code = []
-        var_names = iter(string.ascii_lowercase)
-        for i, name in enumerate(scheds_by_course):
-            c = "{}for {} in scheds_by_course['{}']:".format(i*4*" ", next(var_names), name)
-            code.append(c)
-        # Add on the line that appends to schedules
-        var_names = iter(string.ascii_lowercase)
-        code.append("{}schedules.append([{}])".format(
-            (i+1)*4*" ",
-            ", ".join([next(var_names) for i in xrange(i+1)])
-        ))
-        # Make it a string
-        code_to_exec = "\n".join(code)
-        logging.info("Generated code to execute:\n{}".format(code_to_exec))
-        # Ends up looking something like this:
-        # for a in scheds_by_course['EECE 381']:
-        #     for b in scheds_by_course['EECE 353']:
-        #         for c in scheds_by_course['GEOG 122']:
-        #             for d in scheds_by_course['CPSC 304']:
-        #                 for e in scheds_by_course['EECE 450']:
-        #                     schedules.append([a, b, c, d, e])
-
-        # Let the magic work
-        schedules = []
-        exec code_to_exec
+        schedules = list(product(*scheds_by_course.itervalues()))
         return schedules
 
 

@@ -89,10 +89,11 @@ class SSCConnection(object):
             # Find the appropriate Activity subclass (Lab/Lecture etc.)
             try:
                 activity_cls = {
-                    u'Lecture': Lecture,
-                    u'Laboratory': Lab,
-                    u'Tutorial': Tutorial,
-                    u'Discussion': Discussion
+                    'Lecture': Lecture,
+                    'Lecture-Laboratory': Lecture,
+                    'Laboratory': Lab,
+                    'Tutorial': Tutorial,
+                    'Discussion': Discussion
                 }[data_dict["Activity"]]
             except KeyError:
                 logging.info("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))

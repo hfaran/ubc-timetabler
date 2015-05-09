@@ -19,7 +19,8 @@ def main():
         "CPEN 321",
         "CPEN 421",
         "CPEN 422",
-        "CPEN 492",
+        "APSC 486",
+        # "CPEN 492",
         "CPEN 481",
         "APSC 450"
     )
@@ -27,7 +28,7 @@ def main():
         "CPEN 442",
         "CPSC 312"
     ]
-    num_required_from_opt = 0
+    num_required_from_opt = 2
     combs = combinations(opt, r=num_required_from_opt)
 
     schedules = []
@@ -46,7 +47,13 @@ def main():
             s.courses["GEOG 122"].num_section_constraints = [
                 (Lecture, 1), (Discussion, 1)
             ]
-        schedules.extend(s.generate_schedules())
+
+        # Add statuses for courses that shouldn't be considered
+        bad_statuses = (
+            "Full",
+            # "Blocked",
+        )
+        schedules.extend(s.generate_schedules(bad_statuses=bad_statuses))
     return schedules
 
 

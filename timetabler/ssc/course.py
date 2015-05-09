@@ -12,7 +12,7 @@ class Course(object):
         self.discussions = discussions if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
         self._num_section_constraints = [
-            (l[0].__class__, 1)
+            (l[0].__class__, 2 if l[0].is_multi_term else 1)
             for l in [self.labs, self.lectures,
                       self.tutorials, self.discussions]
             if l

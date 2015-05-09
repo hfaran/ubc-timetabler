@@ -4,7 +4,7 @@ from datetime import datetime
 from itertools import combinations
 
 from timetabler.scheduler import Scheduler
-from timetabler.ssc.course import Lecture, Discussion
+from timetabler.ssc.course import Lecture, Discussion, Lab
 from timetabler import sort, util
 from timetabler.sort import earliest_start  # Helper function (should probably be in util)
 
@@ -29,7 +29,7 @@ def main():
         "CPSC 312"
     ]
     num_required_from_opt = 2
-    combs = combinations(opt, r=num_required_from_opt)
+    combs = list(combinations(opt, r=num_required_from_opt))
 
     schedules = []
     for courses in [required + comb for comb in combs]:
@@ -46,6 +46,12 @@ def main():
             # students, so removing that and only setting Lecture and Discussion
             s.courses["GEOG 122"].num_section_constraints = [
                 (Lecture, 1), (Discussion, 1)
+            ]
+        # Capstone double-books lab and lecture section in both terms at the
+        # same time... so we need to throw in a hack for it
+        if "CPEN 492" in courses:
+            s.courses["CPEN 492"].num_section_constraints = [
+                (Lecture, 1), (Lab, 1)
             ]
 
         # Add statuses for courses that shouldn't be considered

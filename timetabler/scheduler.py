@@ -7,6 +7,15 @@ from timetabler.util import check_equal, all_unique
 from timetabler.schedule import Schedule
 
 
+class NoActivitiesError(Exception):
+    """No activities for given course"""
+    def __init__(self, course_name):
+        self.course_name = course_name
+
+    def __str__(self):
+        return self.course_name
+
+
 class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
         """Schedule
@@ -36,6 +45,9 @@ class Scheduler(object):
         schedules_by_course = {}
         for name, course in self.courses.items():
             logging.info("Generating schedules for {} ...".format(name))
+            # Courses should have at least one activity
+            if not course.activities:
+                raise NoActivitiesError(name)
             acts = course.activities
             r = sum(c[1] for c in course.num_section_constraints)
             combs = combinations(acts, r)

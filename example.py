@@ -19,14 +19,15 @@ def main():
         "CPEN 321",
         "CPEN 421",
         "CPEN 422",
-        "APSC 486",
-        # "CPEN 492",
+        # "APSC 486",  # NVD
+        "CPEN 492",  # CPEN Capstone
         "CPEN 481",
         "APSC 450"
     )
     opt = [
-        "CPEN 442",
-        "CPSC 312"
+        "CPEN 442",  # Introduction to Computer Security
+        "CPSC 312",  # Functional programming
+        "CPSC 340",  # Machine Learning and Data Mining
     ]
     num_required_from_opt = 2
     combs = list(combinations(opt, r=num_required_from_opt))
@@ -47,12 +48,6 @@ def main():
             s.courses["GEOG 122"].num_section_constraints = [
                 (Lecture, 1), (Discussion, 1)
             ]
-        # Capstone double-books lab and lecture section in both terms at the
-        # same time... so we need to throw in a hack for it
-        if "CPEN 492" in courses:
-            s.courses["CPEN 492"].num_section_constraints = [
-                (Lecture, 1), (Lab, 1)
-            ]
 
         # Add statuses for courses that shouldn't be considered
         bad_statuses = (
@@ -65,7 +60,7 @@ def main():
 
 if __name__ == '__main__':
     # Setup logging
-    util.setup_root_logger()
+    util.setup_root_logger('ERROR')
 
     # Get schedules (time operation)
     start_time = datetime.now()

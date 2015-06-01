@@ -82,12 +82,12 @@ def stddev(lst):
     return sqrt(variance)
 
 
-def setup_root_logger():
+def setup_root_logger(log_level='INFO'):
     import logging
     import sys
 
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    root.setLevel(getattr(logging, log_level))
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)

@@ -31,11 +31,20 @@ def main():
         "APSC 450"  # Professional Engineering Practice
     )
     opt = [
+        ## CPSC
         "CPSC 312",  # Functional programming (conflicts with capstone)
-        "CPEN 442",  # Introduction to Computer Security
         "CPSC 340",  # Machine Learning and Data Mining
         "CPSC 415",  # Advanced Operating Systems
+        "CPSC 322",  # Introduction to Artificial Intelligence
+        "CPSC 421",  # Introduction to Theory of Computing
+        "CPSC 418",  # Parallel Computation
+        "CPSC 344",  # Introduction to Human Computer Methods
+        "CPSC 314",  # Computer Graphics
+        "CPSC 404",  # Advanced Relational Databases
+        ## CPEN
+        "CPEN 442",  # Introduction to Computer Security
         "CPEN 431",  # Design of Distributed Software Applications
+        "CPEN 412",  # Microcomputer System Design
     ]
     num_required_from_opt = 2
     combs = list(combinations(opt, r=num_required_from_opt))

@@ -31,8 +31,8 @@ def main():
         "APSC 450"  # Professional Engineering Practice
     )
     opt = [
+        "CPSC 312",  # Functional programming (conflicts with capstone)
         "CPEN 442",  # Introduction to Computer Security
-        "CPSC 312",  # Functional programming
         "CPSC 340",  # Machine Learning and Data Mining
         "CPSC 415",  # Advanced Operating Systems
         "CPEN 431",  # Design of Distributed Software Applications

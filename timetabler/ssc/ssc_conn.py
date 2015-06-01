@@ -5,6 +5,7 @@ from itertools import chain
 
 import requests
 from bs4 import BeautifulSoup
+import filecache
 
 from .course import Lecture, Lab, Tutorial, Course, Discussion
 from timetabler.util import chunks
@@ -56,7 +57,9 @@ class SSCConnection(object):
     # Private Methods #
     ###################
 
-    def _activities_from_page(self, page):
+    @staticmethod
+    @filecache.filecache(filecache.FOREVER)
+    def _activities_from_page(page):
         """Get list of ``Activity`` subclasses from data in ``page``
 
         :rtype: [Activity, ...]

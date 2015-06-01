@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 from time import time
+import sys
 from itertools import combinations
 
 from timetabler.scheduler import Scheduler
@@ -14,13 +15,18 @@ SESSION = "2015W"
 TERMS = (1, 2)
 
 
+def inline_write(s):
+    sys.stdout.write(s)
+    sys.stdout.flush()
+
+
 def main():
     required = (
         "CPEN 321",  # Software Engineering
         "CPEN 421",  # Software Project Management
         "CPEN 422",  # Software Testing and Analysis
         # "APSC 486",  # NVD
-        "CPEN 492",  # CPEN Capstone
+        "CPEN 492",  # Software Engineering Capstone
         "CPEN 481",  # Economic Analysis of Engineering Projects
         "APSC 450"  # Professional Engineering Practice
     )
@@ -28,12 +34,16 @@ def main():
         "CPEN 442",  # Introduction to Computer Security
         "CPSC 312",  # Functional programming
         "CPSC 340",  # Machine Learning and Data Mining
+        "CPSC 415",  # Advanced Operating Systems
+        "CPEN 431",  # Design of Distributed Software Applications
     ]
     num_required_from_opt = 2
     combs = list(combinations(opt, r=num_required_from_opt))
 
     schedules = []
-    for courses in [required + comb for comb in combs]:
+    num_combs = len(combs)
+    inline_write("Computing {} combinations".format(num_combs))
+    for i, courses in enumerate([required + comb for comb in combs]):
         s = Scheduler(courses, session=SESSION, terms=TERMS, refresh=False)
         # I don't want any classes that start before 9:00AM
         s.add_constraint(lambda sched: earliest_start(sched.activities) >= 9)
@@ -55,6 +65,8 @@ def main():
             # "Blocked",
         )
         schedules.extend(s.generate_schedules(bad_statuses=bad_statuses))
+        inline_write(".")
+    sys.stdout.write("\n")
     return schedules
 
 
@@ -71,9 +83,9 @@ if __name__ == '__main__':
     ))
     # Sort and draw
     scheds = sort.free_days(scheds)
-    scheds = sort.even_time_per_day(scheds, commute_hrs=COMMUTE_HOURS)
-    scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.least_time_at_school(scheds, commute_hrs=COMMUTE_HOURS)
+    scheds = sort.sum_latest_daily_morning(scheds)
+    scheds = sort.even_time_per_day(scheds, commute_hrs=COMMUTE_HOURS)
     for i, sched in enumerate(scheds):
         sched.draw(terms=TERMS, draw_location="terminal")
         if i < len(scheds) - 1:

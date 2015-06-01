@@ -65,7 +65,7 @@ class Schedule(object):
         :rtype: list
         """
         assert draw_location in ["browser", "terminal"]
-        tables = map(self._draw, terms)
+        tables = {term: self._draw(term) for term in terms}
         if draw_location=="browser":
             tempdir = tempfile.gettempdir()
             tempfile_loc = os.path.join(tempdir, "ubc-timetabler_{}.html".format(uuid4().hex))
@@ -82,7 +82,7 @@ class Schedule(object):
 
                     <body>
                     """,
-                "</br></br></br>\n".join(map(self._create_table_div, tables)),
+                "</br></br></br>\n".join(map(self._create_table_div, tables.itervalues())),
                 """
                     </body>
 
@@ -92,7 +92,12 @@ class Schedule(object):
             import webbrowser
             webbrowser.open('file://' + os.path.realpath(tempfile_loc))
         elif draw_location=="terminal":
-            for table in tables:
+            for term, table in tables.iteritems():
+                print("Courses for Term {}: {}".format(
+                    term,
+                    ", ".join({" ".join(act.section.split()[:2])
+                               for act in self.activities if act.term == term})
+                ))
                 print(table)
 
         return tables

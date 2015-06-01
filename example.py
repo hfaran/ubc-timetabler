@@ -16,13 +16,13 @@ TERMS = (1, 2)
 
 def main():
     required = (
-        "CPEN 321",
-        "CPEN 421",
-        "CPEN 422",
+        "CPEN 321",  # Software Engineering
+        "CPEN 421",  # Software Project Management
+        "CPEN 422",  # Software Testing and Analysis
         # "APSC 486",  # NVD
         "CPEN 492",  # CPEN Capstone
-        "CPEN 481",
-        "APSC 450"
+        "CPEN 481",  # Economic Analysis of Engineering Projects
+        "APSC 450"  # Professional Engineering Practice
     )
     opt = [
         "CPEN 442",  # Introduction to Computer Security

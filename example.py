@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-from datetime import datetime
+from time import time
 from itertools import combinations
 
 from timetabler.scheduler import Scheduler
@@ -63,11 +63,11 @@ if __name__ == '__main__':
     util.setup_root_logger('ERROR')
 
     # Get schedules (time operation)
-    start_time = datetime.now()
+    start_time = time()
     scheds = main()
     print("There were {} valid schedules found.".format(len(scheds)))
-    print("This took {} to calculate.".format(
-        datetime.now() - start_time
+    print("This took {:.2f} seconds to calculate.".format(
+        time() - start_time
     ))
     # Sort and draw
     scheds = sort.free_days(scheds)

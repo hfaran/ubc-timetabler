@@ -1,7 +1,12 @@
 import os
 import time
 import logging
+import cookielib
+import urllib2
+import urllib
+import re
 from itertools import chain
+from getpass import getpass
 
 import requests
 from bs4 import BeautifulSoup
@@ -27,6 +32,7 @@ class SSCConnection(object):
         )
         if not os.path.exists(self.cache_path):
             os.mkdir(self.cache_path)
+        self.cookies = None
 
     ##################
     # Public Methods #
@@ -53,9 +59,133 @@ class SSCConnection(object):
         )
         return course
 
+    def create_worklist(self, name, session="2015W"):
+        """Creates a worklist with ``name`` for ``session``
+
+        :type name: str
+        :type session: str
+        """
+        # Must first be authorized
+        assert self.cookies, "Unauthorized"
+        # First we navigate to the session so the SSC knows which session to
+        # create the worklist for
+        sessyr, sesscd = session[:-1], session[-1]
+        ref_url = "https://courses.students.ubc.ca/cs/main?sessyr={sessyr}" \
+                  "&sesscd={sesscd}".format(
+            sesscd=sesscd,
+            sessyr=sessyr
+        )
+        requests.get(ref_url, cookies=self.cookies)
+        # Finally, can make the post request to create the worklist
+        op_url = "https://courses.students.ubc.ca/cs/main"
+        op_data = {
+            "attrWorklistName": name,
+            "submit": "Create New Worklist",
+            "pname": "wlist",
+            "tname": "wlist",
+            "attrSelectedWorklist": "-1"
+        }
+        requests.post(op_url, op_data, cookies=self.cookies)
+
+    def authorize(self, username=None, password=None):
+        """Authorize this connection for personal SSC use
+
+        If either password or username are not provided, a prompt
+        is given for the missing value(s).
+
+        :type username: str|None
+        :type password: str|None
+        """
+        if username is None:
+            username = raw_input("Username: ")
+        if password is None:
+            password = getpass()
+        self.cookies = self._auth(username, password)
+
     ###################
     # Private Methods #
     ###################
+
+    def _auth(self, cwl_user, cwl_pass):
+        """Performs SSC auth and returns CookieJar
+
+        This is basically taken verbatim from
+        https://github.com/cyrussassani/ubc-coursecheck/blob/master/ubcCourseChecker.py
+        because SSC auth is a PTFO and it was impossible to get working with
+        requests
+
+        :type cwl_pass: str
+        :type cwl_user: str
+        :rtype: cookielib.CookieJar
+        """
+        # Cookie / Opener holder
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
+        # Login Header
+        opener.addheaders = [('User-agent', 'UBC-Login')]
+
+        # Install opener
+        urllib2.install_opener(opener)
+
+        # Form POST URL
+        postURL = "https://cas.id.ubc.ca/ubc-cas/login/"
+
+        # First request form data
+        formData = {
+            'username': cwl_user,
+            'password': cwl_pass,
+            'execution': 'e1s1',
+            '_eventId': 'submit',
+            'lt': 'xxxxxx',
+            'submit': 'Continue >'
+        }
+
+        # Encode form data
+        data = urllib.urlencode(formData)
+
+        # First request object
+        req = urllib2.Request(postURL, data)
+
+        # Submit request and read data
+        resp = urllib2.urlopen(req)
+        respRead = resp.read()
+
+        # Find the ticket number
+        ticket = "<input type=\"hidden\" name=\"lt\" value=\"(.*?)\" />"
+        t = re.search(ticket, respRead)
+
+        # Extract jsession ID
+        firstRequestInfo = str(resp.info())
+        jsession = "Set-Cookie: JSESSIONID=(.*?);"
+        j = re.search(jsession, firstRequestInfo)
+
+        # Second request form data with ticket
+        formData2 = {
+            'username': cwl_user,
+            'password': cwl_pass,
+            'execution': 'e1s1',
+            '_eventId': 'submit',
+            'lt': t.group(1),
+            'submit': 'Continue >'
+        }
+
+        # Form POST URL with JSESSION ID
+        postURL2 = "https://cas.id.ubc.ca/ubc-cas/login;jsessionid=" + j.group(
+            1)
+
+        # Encode form data
+        data2 = urllib.urlencode(formData2)
+
+        # Submit request
+        req2 = urllib2.Request(postURL2, data2)
+        resp2 = urllib2.urlopen(req2)
+
+        # Perform login
+        loginURL = "https://courses.students.ubc.ca/cs/secure/login"
+        urllib2.urlopen(loginURL)
+
+        return cj
 
     @staticmethod
     @filecache.filecache(filecache.FOREVER)
@@ -88,7 +218,8 @@ class SSCConnection(object):
                 num_missing = 15 - data_length
                 data += ['' for i in xrange(num_missing)]
             # Generate a mapping of the data using ``attrs`` defined below
-            data_dict = {k: data[v].strip(u'\n \xa0') for k, v in attrs.iteritems()}
+            data_dict = {k: data[v].encode('utf-8').strip(u'\n \xa0'.encode('utf-8'))
+                         for k, v in attrs.iteritems()}
             # Find the appropriate Activity subclass (Lab/Lecture etc.)
             try:
                 activity_cls = {
@@ -99,7 +230,8 @@ class SSCConnection(object):
                     'Discussion': Discussion
                 }[data_dict["Activity"]]
             except KeyError:
-                logging.info("Invalid Activity type of {}; skipping.".format(data_dict["Activity"]))
+                logging.info("Invalid Activity type of {}; skipping."
+                             .format(data_dict["Activity"]))
                 return []
             # Create and return activity (or two if in both terms)
             terms = map(int, data_dict["Term"].split('-'))

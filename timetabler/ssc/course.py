@@ -1,3 +1,6 @@
+import re
+
+
 class Course(object):
     def __init__(self, dept, number,
                  lectures=None, labs=None, tutorials=None, discussions=None):
@@ -5,9 +8,9 @@ class Course(object):
         self.number = number
         self.lectures = lectures if lectures else []
         assert all(isinstance(l, Lecture) for l in self.lectures)
-        self.labs = labs if labs else []
+        self.labs = self.skip_duplicates(labs) if labs else []
         assert all(isinstance(l, Lab) for l in self.labs)
-        self.tutorials = tutorials if tutorials else []
+        self.tutorials = self.skip_duplicates(tutorials) if tutorials else []
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
         self.discussions = discussions if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
@@ -18,6 +21,26 @@ class Course(object):
             if l
         ]
         self._constraints = []
+
+    def skip_duplicates(self, activities):
+        non_duplicate_activities = []
+        while activities:
+            activity = activities.pop()
+            pattern = activity.section[:-1] + '\w'
+            if activities:
+                for l in activities:
+                    if re.search(pattern, l.section) and \
+                        l.term == activity.term and \
+                        l.days == activity.days and \
+                        l.start_time == activity.start_time and \
+                        l.end_time == activity.end_time:
+                            print('\nDuplicates: ' + activity.section + ', ' + l.section)
+                            break
+                else:
+                    non_duplicate_activities.append(activity)
+            else:
+                non_duplicate_activities.append(activity)
+        return non_duplicate_activities
 
     @property
     def constraints(self):

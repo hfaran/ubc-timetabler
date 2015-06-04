@@ -16,6 +16,13 @@ from .course import Lecture, Lab, Tutorial, Course, Discussion
 from timetabler.util import chunks
 
 
+## Misc SSC notes
+#
+# req=1 gives you subject code page (i.e., CPSC)
+# req=3 for viewing course page (i.e. CPSC 314)
+# req=5 for viewing INDIVIDUAL section of a course (i.e, CPSC 314 101)
+
+
 class SSCConnection(object):
     """Connection to UBC SSC
 
@@ -69,13 +76,7 @@ class SSCConnection(object):
         assert self.cookies, "Unauthorized"
         # First we navigate to the session so the SSC knows which session to
         # create the worklist for
-        sessyr, sesscd = session[:-1], session[-1]
-        ref_url = "https://courses.students.ubc.ca/cs/main?sessyr={sessyr}" \
-                  "&sesscd={sesscd}".format(
-            sesscd=sesscd,
-            sessyr=sessyr
-        )
-        requests.get(ref_url, cookies=self.cookies)
+        self._navigate_to_session(session=session)
         # Finally, can make the post request to create the worklist
         op_url = "https://courses.students.ubc.ca/cs/main"
         op_data = {
@@ -105,6 +106,17 @@ class SSCConnection(object):
     ###################
     # Private Methods #
     ###################
+
+    def _navigate_to_session(self, session="2015W"):
+        # Must first be authorized
+        assert self.cookies, "Unauthorized"
+        sessyr, sesscd = session[:-1], session[-1]
+        ref_url = "https://courses.students.ubc.ca/cs/main?sessyr={sessyr}" \
+                  "&sesscd={sesscd}".format(
+            sesscd=sesscd,
+            sessyr=sessyr
+        )
+        requests.get(ref_url, cookies=self.cookies)
 
     def _auth(self, cwl_user, cwl_pass):
         """Performs SSC auth and returns CookieJar

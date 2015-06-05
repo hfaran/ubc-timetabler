@@ -10,6 +10,7 @@ from getpass import getpass
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import NavigableString
 import filecache
 
 from .course import Lecture, Lab, Tutorial, Course, Discussion
@@ -21,6 +22,10 @@ from timetabler.util import chunks
 # req=1 gives you subject code page (i.e., CPSC)
 # req=3 for viewing course page (i.e. CPSC 314)
 # req=5 for viewing INDIVIDUAL section of a course (i.e, CPSC 314 101)
+#
+# Use get_worklists() to get list of worklists; can then use them to add
+# courses to worklists by navigating to worklist first
+# and THEN doing submit=save for courses to add to worklist
 
 
 class SSCConnection(object):
@@ -31,7 +36,8 @@ class SSCConnection(object):
     """
 
     def __init__(self, cache_period=3600):
-        self.base_url = "https://courses.students.ubc.ca/cs/main"
+        self.base_url = "https://courses.students.ubc.ca"
+        self.main_url = "{}/cs/main".format(self.base_url)
         self.cache_period = cache_period
         self.cache_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
@@ -88,6 +94,32 @@ class SSCConnection(object):
         }
         requests.post(op_url, op_data, cookies=self.cookies)
 
+    def get_worklists(self, session="2015W"):
+        """Retrieve name:url map for worklists for the given session
+
+        :type session: str
+        :rtype: dict
+        :returns: e.g., {"fooworklist": "https://courses.students.ubc.ca
+            /cs/main?pname=wlist&tname=wlist&attrSelectedWorklist=1000656166"}
+        """
+        # Grab page that has worklists list in it
+        resp = self._navigate_to_session(session)
+        text = resp.text
+        soup = BeautifulSoup(text)
+        # Navigate through tree to find list and a create a map of worklist
+        # name to URL
+        worklist_div = soup.find("div", {"class": "worklist-sidebar docs-sidebar"})
+        worklist_map = {}
+        for item in worklist_div.contents[0].contents:
+            if isinstance(item, NavigableString):
+                continue
+            else:
+                item = item.contents[0]
+                name, link = item["title"], item["href"]
+                if name not in ["New Worklist"]:
+                    worklist_map[name] = "{}{}".format(self.base_url, link)
+        return worklist_map
+
     def authorize(self, username=None, password=None):
         """Authorize this connection for personal SSC use
 
@@ -116,7 +148,7 @@ class SSCConnection(object):
             sesscd=sesscd,
             sessyr=sessyr
         )
-        requests.get(ref_url, cookies=self.cookies)
+        return requests.get(ref_url, cookies=self.cookies)
 
     def _auth(self, cwl_user, cwl_pass):
         """Performs SSC auth and returns CookieJar
@@ -308,7 +340,7 @@ class SSCConnection(object):
         # If not already cached, retrieve, cache, and return
         if page is None:
             logging.info("Page was not found in cache or was invalidated; retrieving from remote and caching...")
-            r = requests.get(self.base_url, params=dict(
+            r = requests.get(self.main_url, params=dict(
                 pname="subjarea",
                 tname="subjareas",
                 req="3",

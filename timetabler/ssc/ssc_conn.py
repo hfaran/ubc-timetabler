@@ -191,7 +191,7 @@ class SSCConnection(object):
 
         # Submit request
         req2 = urllib2.Request(postURL2, data2)
-        resp2 = urllib2.urlopen(req2)
+        urllib2.urlopen(req2)
 
         # Perform login
         loginURL = "https://courses.students.ubc.ca/cs/secure/login"

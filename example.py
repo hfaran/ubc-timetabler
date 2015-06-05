@@ -6,6 +6,7 @@ import logging
 import traceback
 from itertools import combinations
 import json
+import shlex
 
 from timetabler.scheduler import Scheduler
 from timetabler.ssc.course import Lecture, Discussion, Lab
@@ -91,6 +92,7 @@ def repl(schedules, ssc):
     as <worklist> - Add Sections to worklist
     pw <session=2015W> - Print Worklists for session
     dw <name> - Delete worklist with name
+    quit - Quit
     help - Print help
     """
     print(HELP)
@@ -101,29 +103,37 @@ def repl(schedules, ssc):
             while True:
                 try:
                     cmd = raw_input("> ")
-                    if cmd == "n":
+                    cmd = shlex.split(cmd)
+                    if cmd[0] == "n":
                         break
-                    elif cmd.split()[0] == "cw":
-                        name = cmd.split()[1]
+                    elif cmd[0] == "cw":
+                        name = cmd[1]
                         ssc.create_worklist(name, session=SESSION)
-                    elif cmd.split()[0] == "as":
-                        worklist = cmd.split()[1]
+                        print("Created worklist '{}'".format(name))
+                    elif cmd[0] == "as":
+                        worklist = cmd[1]
                         worklists = ssc.cache_worklists(SESSION)
                         assert worklist in worklists
                         for act in sched.activities:
+                            print("Registering {}...".format(act.section))
                             ssc.add_course_to_worklist(
                                 act.section,
                                 SESSION,
                                 worklist
                             )
-                    elif cmd.split()[0] == "pw":
-                            session = cmd.split()[1] if len(cmd.split()) > 1 else SESSION
+                    elif cmd[0] == "pw":
+                            session = cmd[1] if len(cmd) > 1 else SESSION
                             print(json.dumps(ssc.cache_worklists(session),
                                              indent=4))
-                    elif cmd.split()[0] == "dw":
-                        worklist = cmd.split()[1]
+                    elif cmd[0] == "dw":
+                        worklist = cmd[1]
                         ssc.delete_worklist(name=worklist, session=SESSION)
-                    elif cmd == "help":
+                        print("Deleted worklist '{}'".format(worklist))
+                    elif cmd[0] == "quit":
+                        sys.exit(0)
+                    elif cmd[0] == "help":
+                        print(HELP)
+                    else:
                         print(HELP)
                 except Exception as e:
                     logging.error(traceback.format_exc())

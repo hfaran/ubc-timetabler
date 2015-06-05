@@ -46,6 +46,7 @@ class SSCConnection(object):
         if not os.path.exists(self.cache_path):
             os.mkdir(self.cache_path)
         self.cookies = None
+        self.worklists = {}
 
     ##################
     # Public Methods #
@@ -92,7 +93,7 @@ class SSCConnection(object):
             "tname": "wlist",
             "attrSelectedWorklist": "-1"
         }
-        requests.post(op_url, op_data, cookies=self.cookies)
+        self._post(url=op_url, params=op_data)
 
     def get_worklists(self, session="2015W"):
         """Retrieve name:url map for worklists for the given session
@@ -135,20 +136,91 @@ class SSCConnection(object):
             password = getpass()
         self.cookies = self._auth(username, password)
 
+    def add_course_to_worklist(self, section, session, worklist):
+        """Add provided ``section`` of course to worklist for the given session
+
+        :type session: str
+        :type section: str
+        :type worklist: str
+        """
+        # First, we visit the worklist page to ensure we're on the correct
+        # worklist
+        self._navigate_to_worklist(session=session, worklist=worklist)
+        # First navigate to section page itself
+        self._navigate_to_section_page(section=section)
+        # Then, navigate to the page with submit=save to save it in the
+        # worklist
+        self._navigate_to_section_page(section=section, submit="save")
+
     ###################
     # Private Methods #
     ###################
 
-    def _navigate_to_session(self, session="2015W"):
-        # Must first be authorized
+    def _get(self, *args, **kwargs):
+        return self._authreq(requests.get, *args, **kwargs)
+
+    def _post(self, *args, **kwargs):
+        return self._authreq(requests.post, *args, **kwargs)
+
+    def _authreq(self, func, *args, **kwargs):
         assert self.cookies, "Unauthorized"
+        logging.info("Making request {}({}{}{})".format(
+            func.__name__,
+            ",".join(args),
+            ", " if kwargs else "",
+            ",".join("{}={}".format(k, v) for k, v in kwargs.items())
+        ))
+        return func(*args, cookies=self.cookies, **kwargs)
+
+    def _navigate_to_section_page(self, section, session=None, submit=None):
+        """Perform a GET on section page with various params
+
+        :param section: e.g, "CPEN 422 101"
+        :param session: e.g., "2015W"
+            WARNING: this *resets* the selected worklist;
+            do not add this if you want to stay on the existing session,
+            and existing worklist. You should navigate to the worklist
+            first and then do not provide this.
+        :param submit: Provide this as "save" if you wish to add to current
+            worklist
+        """
+        # Note: expand this list when supporting more options
+        assert submit in [None, "save"]
+
+        dept, course, section = section.split()
+        params = dict(
+            pname="subjarea",
+            tname="subjareas",
+            req="5",
+            dept=dept,
+            course=course,
+            section=section
+        )
+        if session:
+            sessyr, sesscd = session[:-1], session[-1]
+            params.update(dict(
+                sessyr=sessyr,
+                sesscd=sesscd,
+            ))
+        if submit is not None:
+            params["submit"] = submit
+        return self._get(self.main_url, params=params)
+
+    def _navigate_to_worklist(self, session, worklist):
+        self._navigate_to_session(session)
+        if session not in self.worklists:
+            self.worklists[session] = self.get_worklists(session)
+        worklist_url = self.worklists[session][worklist]
+        return self._get(worklist_url)
+
+    def _navigate_to_session(self, session="2015W"):
         sessyr, sesscd = session[:-1], session[-1]
         ref_url = "https://courses.students.ubc.ca/cs/main?sessyr={sessyr}" \
                   "&sesscd={sesscd}".format(
             sesscd=sesscd,
             sessyr=sessyr
         )
-        return requests.get(ref_url, cookies=self.cookies)
+        return self._get(ref_url)
 
     def _auth(self, cwl_user, cwl_pass):
         """Performs SSC auth and returns CookieJar

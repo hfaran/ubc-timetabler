@@ -79,21 +79,18 @@ class SSCConnection(object):
         :type name: str
         :type session: str
         """
-        # Must first be authorized
-        assert self.cookies, "Unauthorized"
         # First we navigate to the session so the SSC knows which session to
         # create the worklist for
         self._navigate_to_session(session=session)
         # Finally, can make the post request to create the worklist
-        op_url = "https://courses.students.ubc.ca/cs/main"
-        op_data = {
+        params = {
             "attrWorklistName": name,
             "submit": "Create New Worklist",
             "pname": "wlist",
             "tname": "wlist",
             "attrSelectedWorklist": "-1"
         }
-        self._post(url=op_url, params=op_data)
+        self._post(url=self.main_url, params=params)
 
     def get_worklists(self, session="2015W"):
         """Retrieve name:url map for worklists for the given session
@@ -391,7 +388,6 @@ class SSCConnection(object):
             activities_from_data(data_chunk)
             for data_chunk in chunks(t, 15)
         ))
-
 
     def _get_course_page(self, dept="CPSC", course_num="304", sessyr="2014", sesscd="W", invalidate=False):
         """Get course page from SSC

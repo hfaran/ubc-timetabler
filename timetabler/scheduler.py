@@ -17,7 +17,8 @@ class NoActivitiesError(Exception):
 
 
 class Scheduler(object):
-    def __init__(self, courses, session="2014W", terms=(1, 2), refresh=False):
+    def __init__(self, courses, session="2014W", terms=(1, 2),
+                 refresh=False, ssc_conn=None):
         """Schedule
 
         :type  courses: list|tuple
@@ -28,8 +29,9 @@ class Scheduler(object):
         :param terms: List of terms you want to schedule courses in;
             i.e., [1] for only first term, [1, 2] for whole session etc.
         :param refresh: Invalidate all cached data for relevant courses
+        :type ssc_conn: SSCConnection
         """
-        self.ssc_conn = SSCConnection()
+        self.ssc_conn = SSCConnection() if ssc_conn is None else ssc_conn
         self.courses = {c: self.ssc_conn.get_course(c, session, refresh=refresh)
                         for c in courses}
         self.terms = terms

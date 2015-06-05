@@ -79,6 +79,10 @@ class SSCConnection(object):
         :type name: str
         :type session: str
         """
+        worklists = self.cache_worklists(session)
+        if name in worklists:
+            raise KeyError("Worklist {} already exists!.".format(name))
+
         # First we navigate to the session so the SSC knows which session to
         # create the worklist for
         self._navigate_to_session(session=session)
@@ -91,6 +95,34 @@ class SSCConnection(object):
             "attrSelectedWorklist": "-1"
         }
         self._post(url=self.main_url, params=params)
+        self.cache_worklists(session=session, force=True)
+
+    def delete_worklist(self, name, session="2015W"):
+        worklists = self.cache_worklists(session)
+        if name not in worklists:
+            raise KeyError("No such worklist {} exists.".format(name))
+        worklist_id = worklists[name].split('=')[-1]
+
+        self._navigate_to_worklist(session=session, worklist=name)
+        params = {
+            "submit": "Delete Worklist",
+            "attrSelectedWorklist": worklist_id
+        }
+        self._post(self.main_url, params=params)
+        self.cache_worklists(session=session, force=True)
+
+    def cache_worklists(self, session="2015W", force=False):
+        """Cache and return worklists for ``session``
+
+        :type session: str
+        :type force: bool
+        :param force: Will always fetch new results if ``force`` is set
+        :return: Worklists for the given session
+        :rtype: dict
+        """
+        if session not in self.worklists or force:
+            self.worklists[session] = self.get_worklists(session)
+        return self.worklists[session]
 
     def get_worklists(self, session="2015W"):
         """Retrieve name:url map for worklists for the given session

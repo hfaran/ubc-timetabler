@@ -7,6 +7,8 @@ import traceback
 from itertools import combinations
 import json
 import shlex
+import os
+from getpass import getpass
 
 from timetabler.scheduler import Scheduler
 from timetabler.ssc.course import Lecture, Discussion, Lab
@@ -37,7 +39,7 @@ def get_schedules(ssc_conn):
     )
     opt = [
         ## CPSC
-        "CPSC 312",  # Functional programming (conflicts with capstone)
+        "CPSC 312",  # Functional programming
         "CPSC 340",  # Machine Learning and Data Mining
         "CPSC 415",  # Advanced Operating Systems
         "CPSC 322",  # Introduction to Artificial Intelligence
@@ -56,7 +58,7 @@ def get_schedules(ssc_conn):
 
     schedules = []
     num_combs = len(combs)
-    inline_write("Computing {} combinations".format(num_combs))
+    inline_write("Processing {} combinations".format(num_combs))
     for i, courses in enumerate([required + comb for comb in combs]):
         s = Scheduler(courses, session=SESSION, terms=TERMS, refresh=False,
                       ssc_conn=ssc_conn)
@@ -141,9 +143,23 @@ def repl(schedules, ssc):
 
 
 def main():
-    # Must have a credentials.json file with
-    # {"username": ..., "password": ...}
-    credentials = json.load(open("credentials.json"))
+    # Get SSC credentials
+    CREDENTIALS_FILE = "credentials.json"
+    if not os.path.exists(CREDENTIALS_FILE):
+        print("Please enter your SSC username and password (these will be "
+              "stored on your local filesystem as {})".format(
+            os.path.abspath(CREDENTIALS_FILE)
+        ))
+        credentials = dict(
+            username=raw_input("Username: "),
+            password=getpass()
+        )
+        with open(CREDENTIALS_FILE, 'w+') as f:
+            json.dump(credentials, f)
+    else:
+        credentials = json.load(open("credentials.json"))
+
+    # Create SSC connection and log in
     ssc = SSCConnection()
     ssc.authorize(**credentials)
 
@@ -157,7 +173,9 @@ def main():
     print("This took {:.2f} seconds to calculate.".format(
         time() - start_time
     ))
-    # Sort and draw
+    # Sort
+    # Statements in order from top-to-bottom from least-to-most important
+    # i.e., put the most important at the bottom
     scheds = sort.free_days(scheds)
     scheds = sort.least_time_at_school(scheds, commute_hrs=COMMUTE_HOURS)
     scheds = sort.sum_latest_daily_morning(scheds)

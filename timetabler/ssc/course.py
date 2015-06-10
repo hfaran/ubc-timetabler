@@ -4,16 +4,17 @@ import re
 
 class Course(object):
     def __init__(self, dept, number,
-                 lectures=None, labs=None, tutorials=None, discussions=None):
+                 lectures=None, labs=None, tutorials=None, discussions=None,
+                 duplicates=True):
         self.dept = dept
         self.number = number
         self.lectures = lectures if lectures else []
         assert all(isinstance(l, Lecture) for l in self.lectures)
-        self.labs = self.skip_duplicates(labs) if labs else []
+        self.labs = self.skip_duplicates(labs, duplicates) if labs else []
         assert all(isinstance(l, Lab) for l in self.labs)
-        self.tutorials = self.skip_duplicates(tutorials) if tutorials else []
+        self.tutorials = self.skip_duplicates(tutorials, duplicates) if tutorials else []
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
-        self.discussions = discussions if discussions else []
+        self.discussions = self.skip_duplicates(discussions, duplicates) if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
         self._num_section_constraints = [
             (l[0].__class__, (2 if l[0].is_multi_term else 1))
@@ -23,7 +24,18 @@ class Course(object):
         ]
         self._constraints = []
 
-    def skip_duplicates(self, activities):
+    def skip_duplicates(self, activities, duplicates=True):
+        """Skip variations of the same activities that occur at the same time
+
+        :type  activities: list
+        :param activities: [Activity]
+        :type  duplicates: bool
+        :param duplicates: If this is set, variant activities are not filtered
+        :rtype: list
+        :return: Activities with unique times
+        """
+        if duplicates:
+            return activities
         non_duplicate_activities = []
         while activities:
             activity = activities.pop()

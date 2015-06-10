@@ -1,3 +1,4 @@
+import logging
 import re
 
 
@@ -34,7 +35,7 @@ class Course(object):
                         l.days == activity.days and \
                         l.start_time == activity.start_time and \
                         l.end_time == activity.end_time:
-                            print('\nDuplicates: ' + activity.section + ', ' + l.section)
+                            logging.warning('\nDuplicates: ' + activity.section + ', ' + l.section)
                             break
                 else:
                     non_duplicate_activities.append(activity)

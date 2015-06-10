@@ -1,6 +1,5 @@
 import logging
-import string
-from itertools import combinations, chain, ifilter, product
+from itertools import combinations, ifilter, product
 
 from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique

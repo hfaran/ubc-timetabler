@@ -1,5 +1,6 @@
 """This module contains common sorting functions useful for sorting schedules"""
 from __future__ import division
+from collections import defaultdict
 
 from timetabler.util import DAY_LIST, strtime2num, stddev
 
@@ -66,6 +67,23 @@ def even_time_per_day(schedules, commute_hrs=0):
                              (2 * commute_hrs)
             time_at_school_week.append(time_at_school)
         return stddev(time_at_school_week)
+
+    return sorted(schedules, key=key)
+
+
+def even_courses_per_term(schedules):
+    """Sort for 'even' number of courses per term
+
+    This is done by creating a dict which has sets of courses per term; then
+     we take the standard deviation of the number of courses per term. The
+     smaller the deviation, the better in this case.
+    """
+
+    def key(s):
+        d = defaultdict(set)
+        for act in s.activities:
+            d[act.term].add(tuple(act.section.split()[:2]))
+        return stddev(map(len, d.values()))
 
     return sorted(schedules, key=key)
 

@@ -48,6 +48,7 @@ def get_schedules(ssc_conn):
         "CPSC 314",  # Computer Graphics
         "CPSC 404",  # Advanced Relational Databases
         ## CPEN
+        "CPEN 400A",  # Topics in Computer Engineering (Building Modern Web Applications)
         "CPEN 442",  # Introduction to Computer Security
         "CPEN 431",  # Design of Distributed Software Applications
         "CPEN 412",  # Microcomputer System Design

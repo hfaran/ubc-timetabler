@@ -202,6 +202,7 @@ def main():
     scheds = sort.least_time_at_school(scheds, commute_hrs=COMMUTE_HOURS)
     scheds = sort.sum_latest_daily_morning(scheds)
     scheds = sort.even_time_per_day(scheds, commute_hrs=COMMUTE_HOURS)
+    scheds = sort.even_courses_per_term(scheds)
 
     repl(scheds, ssc)
 

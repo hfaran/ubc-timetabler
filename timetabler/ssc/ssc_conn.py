@@ -52,7 +52,8 @@ class SSCConnection(object):
     # Public Methods #
     ##################
 
-    def get_course(self, course_name="CPSC 304", session="2014W", refresh=False):
+    def get_course(self, course_name="CPSC 304", session="2014W", refresh=False,
+                   duplicates=True):
         dept, course_num = course_name.split()
         sessyr, sesscd = session[:4], session[-1]
         page = self._get_course_page(dept, course_num, sessyr, sesscd, invalidate=refresh)
@@ -69,7 +70,8 @@ class SSCConnection(object):
             lectures=lectures,
             labs=labs,
             tutorials=tutorials,
-            discussions=discussions
+            discussions=discussions,
+            duplicates=duplicates
         )
         return course
 

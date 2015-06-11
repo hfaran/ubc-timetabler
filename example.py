@@ -61,7 +61,7 @@ def get_schedules(ssc_conn):
     inline_write("Processing {} combinations".format(num_combs))
     for i, courses in enumerate([required + comb for comb in combs]):
         s = Scheduler(courses, session=SESSION, terms=TERMS, refresh=False,
-                      ssc_conn=ssc_conn)
+                      duplicates=True, ssc_conn=ssc_conn)
         # I don't want any classes that start before 9:00AM
         s.add_constraint(lambda sched: earliest_start(sched.activities) >= 9)
         # Add GEOG122 constraints if we need to

@@ -1,6 +1,5 @@
 import logging
-import string
-from itertools import combinations, chain, ifilter, product
+from itertools import combinations, ifilter, product
 
 from timetabler.ssc import SSCConnection
 from timetabler.util import check_equal, all_unique
@@ -18,7 +17,7 @@ class NoActivitiesError(Exception):
 
 class Scheduler(object):
     def __init__(self, courses, session="2014W", terms=(1, 2),
-                 refresh=False, ssc_conn=None):
+                 refresh=False, duplicates=True, ssc_conn=None):
         """Schedule
 
         :type  courses: list|tuple
@@ -32,7 +31,8 @@ class Scheduler(object):
         :type ssc_conn: SSCConnection
         """
         self.ssc_conn = SSCConnection() if ssc_conn is None else ssc_conn
-        self.courses = {c: self.ssc_conn.get_course(c, session, refresh=refresh)
+        self.courses = {c: self.ssc_conn.get_course(c, session, refresh=refresh,
+                                                    duplicates=duplicates)
                         for c in courses}
         self.terms = terms
         self.session = session

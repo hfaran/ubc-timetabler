@@ -88,6 +88,9 @@ def get_schedules(ssc_conn):
 
 
 def repl(schedules, ssc):
+    # Sets up readline goodness for us so the prompt doesn't suck on OS X
+    import gnureadline
+
     HELP = """
     n - Next
     cw <name> - Create Worklist with name

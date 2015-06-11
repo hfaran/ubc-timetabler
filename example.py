@@ -19,6 +19,16 @@ from timetabler.ssc.ssc_conn import SSCConnection
 COMMUTE_HOURS = 1.75
 SESSION = "2015W"
 TERMS = (1, 2)
+# If this is set, pages will be freshly fetched from the SSC every time
+# This is only recommended if it is close to course-registration time
+#  and courses are being closed out (please be friendly to the SSC
+#  and leave this set to False for the usual case)
+NO_CACHE = False
+# If this is set, sections, such as labs that are in the same slot
+#  but are at different places, are only represented as the first section
+#  in the set of many. This is useful to set to True closer to course
+#  registration when you are actually building worklists.
+ALLOW_SAME_SLOT_SECTIONS = False
 
 
 def inline_write(s):
@@ -34,7 +44,7 @@ def get_schedules(ssc_conn):
         # "APSC 486",  # NVD
         "CPEN 492",  # Software Engineering Capstone
         "CPEN 481",  # Economic Analysis of Engineering Projects
-        "APSC 450"  # Professional Engineering Practice
+        "APSC 450",  # Professional Engineering Practice
     )
     opt = [
         ## CPSC
@@ -52,6 +62,7 @@ def get_schedules(ssc_conn):
         "CPEN 442",  # Introduction to Computer Security
         "CPEN 431",  # Design of Distributed Software Applications
         "CPEN 412",  # Microcomputer System Design
+        "CPEN 411",  # Computer Architecture
     ]
     num_required_from_opt = 2
     combs = list(combinations(opt, r=num_required_from_opt))
@@ -60,8 +71,8 @@ def get_schedules(ssc_conn):
     num_combs = len(combs)
     inline_write("Processing {} combinations".format(num_combs))
     for i, courses in enumerate([required + comb for comb in combs]):
-        s = Scheduler(courses, session=SESSION, terms=TERMS, refresh=False,
-                      duplicates=True, ssc_conn=ssc_conn)
+        s = Scheduler(courses, session=SESSION, terms=TERMS, refresh=NO_CACHE,
+                      duplicates=ALLOW_SAME_SLOT_SECTIONS, ssc_conn=ssc_conn)
         # I don't want any classes that start before 9:00AM
         s.add_constraint(lambda sched: earliest_start(sched.activities) >= 9)
         # Add GEOG122 constraints if we need to
@@ -103,7 +114,7 @@ def repl(schedules, ssc):
     as <worklist> - Add Sections to worklist
     pw <session=2015W> - Print Worklists for session
     dw <name> - Delete worklist with name
-    quit - Quit
+    q - Quit
     help - Print help
     """
     print(HELP)
@@ -115,6 +126,8 @@ def repl(schedules, ssc):
                 try:
                     cmd = raw_input("> ")
                     cmd = shlex.split(cmd)
+                    if not cmd:
+                        continue
                     if cmd[0] == "n":
                         break
                     elif cmd[0] == "cw":
@@ -140,7 +153,7 @@ def repl(schedules, ssc):
                         worklist = cmd[1]
                         ssc.delete_worklist(name=worklist, session=SESSION)
                         print("Deleted worklist '{}'".format(worklist))
-                    elif cmd[0] == "quit":
+                    elif cmd[0] == "q":
                         sys.exit(0)
                     elif cmd[0] == "help":
                         print(HELP)

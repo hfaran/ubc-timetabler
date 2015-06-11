@@ -3,7 +3,6 @@
 from time import time
 import sys
 import logging
-import traceback
 from itertools import combinations
 import json
 import shlex
@@ -137,8 +136,8 @@ def repl(schedules, ssc):
                         print(HELP)
                     else:
                         print(HELP)
-                except Exception as e:
-                    logging.error(traceback.format_exc())
+                except Exception as err:
+                    logging.exception(err)
                     print(HELP)
 
 

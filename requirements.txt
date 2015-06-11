@@ -2,4 +2,9 @@ requests
 beautifulsoup4
 prettytable
 filecache
-gnureadline
+
+# If using OS X
+# gnureadline
+
+# If using Windows
+# pyreadline

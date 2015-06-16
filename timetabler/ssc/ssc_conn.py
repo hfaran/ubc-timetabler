@@ -65,7 +65,7 @@ class SSCConnection(object):
         if isinstance(course, tuple):
             course_name, course_title = course
         elif isinstance(course, str):
-            course_name, course_title = course, None
+            course_name, course_title = course, course
         else:
             raise TypeError
         dept, course_num = course_name.split()

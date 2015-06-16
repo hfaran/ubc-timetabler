@@ -52,8 +52,22 @@ class SSCConnection(object):
     # Public Methods #
     ##################
 
-    def get_course(self, course_name="CPSC 304", session="2014W", refresh=False,
-                   duplicates=True):
+    def get_course(self, course=("CPSC 304", "Introduction to Databases"),
+                   session="2014W", refresh=False, duplicates=True):
+        """Get course data for provided ``course``
+
+        :type course: tuple|str
+        :type session: str
+        :type refresh: bool
+        :type duplicates: bool
+        :rtype: Course
+        """
+        if isinstance(course, tuple):
+            course_name, course_title = course
+        elif isinstance(course, str):
+            course_name, course_title = course, None
+        else:
+            raise TypeError
         dept, course_num = course_name.split()
         sessyr, sesscd = session[:4], session[-1]
         page = self._get_course_page(dept, course_num, sessyr, sesscd, invalidate=refresh)
@@ -67,6 +81,7 @@ class SSCConnection(object):
         course = Course(
             dept=dept,
             number=course_num,
+            title=course_title,
             lectures=lectures,
             labs=labs,
             tutorials=tutorials,

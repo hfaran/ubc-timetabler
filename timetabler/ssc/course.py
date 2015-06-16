@@ -1,13 +1,15 @@
+import itertools
 import logging
 import re
 
 
 class Course(object):
-    def __init__(self, dept, number,
+    def __init__(self, dept, number, title,
                  lectures=None, labs=None, tutorials=None, discussions=None,
                  duplicates=True):
         self.dept = dept
         self.number = number
+        self.title = title
         self.lectures = lectures if lectures else []
         assert all(isinstance(l, Lecture) for l in self.lectures)
         self.labs = self.skip_duplicates(labs, duplicates) if labs else []
@@ -16,10 +18,17 @@ class Course(object):
         assert all(isinstance(l, Tutorial) for l in self.tutorials)
         self.discussions = self.skip_duplicates(discussions, duplicates) if discussions else []
         assert all(isinstance(l, Discussion) for l in self.discussions)
+
+        collection_activities = [
+            self.labs, self.lectures,
+            self.tutorials, self.discussions
+        ]
+        # Set course for each activity
+        for activity in itertools.chain(*collection_activities):
+            activity.course = self
         self._num_section_constraints = [
             (l[0].__class__, (2 if l[0].is_multi_term else 1))
-            for l in [self.labs, self.lectures,
-                      self.tutorials, self.discussions]
+            for l in collection_activities
             if l
         ]
         self._constraints = []
@@ -98,6 +107,16 @@ class Activity(object):
         self.end_time = end_time.zfill(5)
         self.comments = comments
         self.is_multi_term = is_multi_term  # boolean
+
+        self._course = None  # Reference to Course object that has this activity
+
+    @property
+    def course(self):
+        return self._course
+
+    @course.setter
+    def course(self, value):
+        self._course = value
 
     def __repr__(self):
         return "{}<{}>".format(

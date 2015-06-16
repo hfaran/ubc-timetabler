@@ -38,31 +38,32 @@ def inline_write(s):
 
 def get_schedules(ssc_conn):
     required = (
-        "CPEN 321",  # Software Engineering
-        "CPEN 421",  # Software Project Management
-        "CPEN 422",  # Software Testing and Analysis
-        # "APSC 486",  # NVD
-        "CPEN 492",  # Software Engineering Capstone
-        "CPEN 481",  # Economic Analysis of Engineering Projects
-        "APSC 450",  # Professional Engineering Practice
+        ("CPEN 321", "Software Engineering"),
+        ("CPEN 421", "Software Project Management"),
+        ("CPEN 422", "Software Testing and Analysis"),
+        # ("APSC 486", "NVD"),
+        ("CPEN 492", "Software Engineering Capstone"),
+        ("CPEN 481", "Economic Analysis of Engineering Projects"),
+        ("APSC 450", "Professional Engineering Practice"),
     )
     opt = [
         ## CPSC
-        "CPSC 312",  # Functional programming
-        "CPSC 340",  # Machine Learning and Data Mining
-        "CPSC 415",  # Advanced Operating Systems
-        "CPSC 322",  # Introduction to Artificial Intelligence
-        "CPSC 421",  # Introduction to Theory of Computing
-        "CPSC 418",  # Parallel Computation
-        "CPSC 344",  # Introduction to Human Computer Methods
-        "CPSC 314",  # Computer Graphics
-        "CPSC 404",  # Advanced Relational Databases
+        ("CPSC 312", "Functional programming"),
+        ("CPSC 340", "Machine Learning and Data Mining"),
+        ("CPSC 415", "Advanced Operating Systems"),
+        ("CPSC 322", "Introduction to Artificial Intelligence"),
+        ("CPSC 421", "Introduction to Theory of Computing"),
+        ("CPSC 418", "Parallel Computation"),
+        ("CPSC 344", "Introduction to Human Computer Methods"),
+        ("CPSC 314", "Computer Graphics"),
+        ("CPSC 404", "Advanced Relational Databases"),
+        ("CPSC 425", "Computer Vision"),
         ## CPEN
-        "CPEN 400A",  # Topics in Computer Engineering (Building Modern Web Applications)
-        "CPEN 442",  # Introduction to Computer Security
-        "CPEN 431",  # Design of Distributed Software Applications
-        "CPEN 412",  # Microcomputer System Design
-        "CPEN 411",  # Computer Architecture
+        ("CPEN 400A", "Topics in Computer Engineering (Building Modern Web Applications)"),
+        ("CPEN 442", "Introduction to Computer Security"),
+        ("CPEN 431", "Design of Distributed Software Applications"),
+        ("CPEN 412", "Microcomputer System Design"),
+        ("CPEN 411", "Computer Architecture"),
     ]
     num_required_from_opt = 2
     combs = list(combinations(opt, r=num_required_from_opt))

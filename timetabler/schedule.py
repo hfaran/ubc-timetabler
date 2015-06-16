@@ -95,7 +95,7 @@ class Schedule(object):
             for term, table in tables.iteritems():
                 print("Courses for Term {}: {}".format(
                     term,
-                    ", ".join({" ".join(act.section.split()[:2])
+                    ", ".join({act.course.title
                                for act in self.activities if act.term == term})
                 ))
                 print(table)

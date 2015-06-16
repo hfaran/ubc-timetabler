@@ -55,12 +55,13 @@ class Schedule(object):
             '</div>'
         )
 
-    def draw(self, terms=(1,), draw_location="browser"):
+    def draw(self, terms=(1,), draw_location="browser", title_format="code"):
         """Draw schedule
 
         :type terms: tuple or list
         :param term: Terms for which you would like to draw the schedule
         :param draw_location: "browser"|"terminal"
+        :param title_format: "title"|"code"
         :returns: List of tables
         :rtype: list
         """
@@ -93,9 +94,13 @@ class Schedule(object):
             webbrowser.open('file://' + os.path.realpath(tempfile_loc))
         elif draw_location=="terminal":
             for term, table in tables.iteritems():
+                title_formatters = {
+                    "title": lambda act: act.course.title,
+                    "code": lambda act: "{} {}".format(act.course.dept, act.course.number)
+                }
                 print("Courses for Term {}: {}".format(
                     term,
-                    ", ".join({act.course.title
+                    ", ".join({title_formatters[title_format](act)
                                for act in self.activities if act.term == term})
                 ))
                 print(table)

@@ -121,7 +121,7 @@ def repl(schedules, ssc):
     print(HELP)
 
     for i, sched in enumerate(schedules):
-        sched.draw(terms=TERMS, draw_location="terminal")
+        sched.draw(terms=TERMS, draw_location="terminal", title_format="code")
         if i < len(schedules) - 1:
             while True:
                 try:

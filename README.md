@@ -100,4 +100,9 @@ Modify the above to your liking.
 Use the REPL in `example.py` to browse, and create worklists for schedules
 you like.
 
+```
+python example.py
+> help
+```
+
 ![Example](example2.jpg?raw=true "Example")

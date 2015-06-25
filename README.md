@@ -6,11 +6,6 @@ Enter desired courses and get generated schedules.
 
 ![Example](example.jpg?raw=true "Example")
 
-Use the REPL in `example.py` to browse, and create worklists for schedules
-you like.
-
-![Example](example2.jpg?raw=true "Example")
-
 ## Setup
 
 `pip install -r requirements.txt`
@@ -99,3 +94,10 @@ Modify the above as required (but "Full" and "Blocked" are good defaults).
 ```
 
 Modify the above to your liking.
+
+### Looking at the Results
+
+Use the REPL in `example.py` to browse, and create worklists for schedules
+you like.
+
+![Example](example2.jpg?raw=true "Example")

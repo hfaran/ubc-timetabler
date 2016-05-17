@@ -99,7 +99,7 @@ class Scheduler(object):
 
         :type  constraint: callable
         :param constraint: A callable that takes a Schedule
-            and returns True or False depending on where
+            and returns True or False depending on whether
             a constraint is met
         """
         self._constraints.append(constraint)
